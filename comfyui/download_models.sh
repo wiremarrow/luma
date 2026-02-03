@@ -66,6 +66,7 @@
 # Size: 6.5 GB
 # Purpose: Primary SDXL checkpoint for Stage 1 generation
 # Renamed: No
+# SHA256: 912c9dc74f5855175c31a7993f863a043ac8dcc31732b324cd05d75cd7e16844
 #
 # Model: realvisxlV50_v50LightningBakedvae.safetensors
 # Source: https://huggingface.co/SG161222/RealVisXL_V5.0_Lightning
@@ -74,6 +75,7 @@
 # Purpose: Fast SDXL checkpoint (4-step Lightning distillation)
 # Renamed: YES - from "RealVisXL_V5.0_Lightning_fp16.safetensors"
 # Reason: Workflow JSON expects Civitai naming convention
+# SHA256: fabcadd9330dcc4f9702063428d40b9d4d07168d8acefc819b8d1d9db466b3ec
 #
 # -----------------------------------------------------------------------------
 # FLUX MODELS (Main Diffusion) -> /models/unet/
@@ -86,6 +88,7 @@
 # Purpose: Flux.1-dev diffusion model with Q8_0 quantization
 # Renamed: No
 # Note: Q8 provides best quality. Do NOT substitute with Q5/Q4 variants.
+# SHA256: 129032f32224bf7138f16e18673d8008ba5f84c1ec74063bf4511a8bb4cf553d
 #
 # -----------------------------------------------------------------------------
 # TEXT ENCODERS (CLIP) -> /models/clip/
@@ -97,6 +100,7 @@
 # Size: 4.7 GB
 # Purpose: T5-XXL text encoder for Flux text conditioning
 # Renamed: No
+# SHA256: 1dc600961d3c5ed081f6700485cdc7ed9cfb4631f2dc385b7ac6bd3c80846d0d
 #
 # Model: clip_l.safetensors
 # Source: https://huggingface.co/comfyanonymous/flux_text_encoders
@@ -104,6 +108,7 @@
 # Size: 235 MB
 # Purpose: CLIP-L text encoder for Flux
 # Renamed: No
+# SHA256: 660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd
 #
 # -----------------------------------------------------------------------------
 # VISION ENCODERS -> /models/clip_vision/
@@ -115,6 +120,7 @@
 # Size: 2.4 GB
 # Purpose: CLIP Vision encoder required by IP-Adapter for image conditioning
 # Renamed: No
+# SHA256: 6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030
 #
 # -----------------------------------------------------------------------------
 # VAE -> /models/vae/
@@ -138,6 +144,7 @@
 # Size: 2.3 GB
 # Purpose: Edge detection ControlNet for architectural line guidance
 # Renamed: No
+# SHA256: 80664d80e3f233371cb6921110d0a6b7a40c01571905463f9dde5637e7894ed3
 #
 # Model: diffusers_xl_depth_full.safetensors
 # Source: https://huggingface.co/lllyasviel/sd_control_collection
@@ -145,6 +152,7 @@
 # Size: 2.3 GB
 # Purpose: Depth-based ControlNet for spatial structure guidance
 # Renamed: No
+# SHA256: 8ba4dfaa1958f1f68e5dc7f9839f9ef4e153aef0d330291e5cf966c925f97477
 #
 # Model: thibaud_xl_openpose.safetensors
 # Source: https://huggingface.co/lllyasviel/sd_control_collection
@@ -152,6 +160,7 @@
 # Size: 2.3 GB
 # Purpose: OpenPose skeleton ControlNet for human figure guidance
 # Renamed: No
+# SHA256: 9e070426568a3c60c128ffb98c66cdc7a0ea21d0d8abb86f73564aaf2e0c6f42
 #
 # -----------------------------------------------------------------------------
 # IP-ADAPTER -> /models/ipadapter/
@@ -163,6 +172,7 @@
 # Size: 808 MB
 # Purpose: Image prompt adapter for style/reference image conditioning
 # Renamed: No
+# SHA256: 3f5062b8400c94b7159665b21ba5c62acdcd7682262743d7f2aefedef00e6581
 #
 # -----------------------------------------------------------------------------
 # DEPTH ESTIMATION -> /models/depth/
@@ -175,6 +185,7 @@
 # Purpose: Monocular depth estimation (V2 - improved accuracy)
 # Renamed: No
 # Security: .pth format - verified original author repository
+# SHA256: a7ea19fa0ed99244e67b624c72b8580b7e9553043245905be58796a608eb9345
 #
 # Model: depth_anything_vitl14.pth
 # Source: https://huggingface.co/spaces/LiheYoung/Depth-Anything
@@ -183,6 +194,7 @@
 # Purpose: Monocular depth estimation (V1 - workflow uses both versions)
 # Renamed: No
 # Security: .pth format - verified original author repository
+# SHA256: 6c6a383e33e51c5fdfbf31e7ebcda943973a9e6a1cbef1564afe58d7f2e8fe63
 #
 # -----------------------------------------------------------------------------
 # UPSCALERS -> /models/upscale_models/
@@ -195,6 +207,7 @@
 # Purpose: 4x ESRGAN upscaling for final image enhancement
 # Renamed: No
 # Security: .pth format - from verified ESRGAN model collection
+# SHA256: 985fba37421353716ef2fbd7fbbab061e76409994d168cf52527aa8ee53f81ec
 #
 # ============================================================================
 # CUSTOM NODE MODELS (ComfyUI/models/)
@@ -218,6 +231,7 @@
 # Purpose: Segment Anything 2 for object detection and masking
 # Location: ComfyUI/models/sam2/ (NOT /models/sam2/)
 # Reason: DownloadAndLoadSAM2Model checks folder_paths.models_dir/sam2/
+# SHA256: eb4b5f725c8b68205aa05bbe6b27efc628b18b4b9c7b9bb8218991b86b9a4932
 #
 # -----------------------------------------------------------------------------
 # VISION-LANGUAGE MODEL -> ComfyUI/models/LLM/
@@ -231,6 +245,7 @@
 # Location: ComfyUI/models/LLM/Florence-2-large/
 # Reason: DownloadAndLoadFlorence2Model checks folder_paths.models_dir/LLM/
 # Note: pytorch_model.bin is removed after download (redundant with safetensors)
+# SHA256: 4f38ce741c6b71188fe2b3419a55e11917a8a7b321ae2e63c61da0191b0ebad7 (model.safetensors)
 #
 # ============================================================================
 # SOURCE VERIFICATION TIERS
@@ -489,7 +504,8 @@ main() {
 
     # CLIP-L from ComfyUI maintainer
     log_info "CLIP-L from ComfyUI maintainer..."
-    hf_download "comfyanonymous/flux_text_encoders" "clip_l.safetensors" "$MODELS_DIR/clip"
+    hf_download "comfyanonymous/flux_text_encoders" "clip_l.safetensors" "$MODELS_DIR/clip" \
+        "660c6f5b1abae9dc498ac2d21e1347d2abdb0cf6c0c0c8576cd796491d9a6cdd"
 
     # Florence-2 from Microsoft (full repository)
     log_info "Florence-2-large from Microsoft..."
@@ -501,6 +517,13 @@ main() {
         log_info "Removed redundant pytorch_model.bin (using model.safetensors)"
     fi
 
+    # Verify Florence-2 model.safetensors
+    local florence_model="$COMFYUI_MODELS/LLM/Florence-2-large/model.safetensors"
+    local florence_hash="4f38ce741c6b71188fe2b3419a55e11917a8a7b321ae2e63c61da0191b0ebad7"
+    if [ -f "$florence_model" ]; then
+        verify_hash "$florence_model" "$florence_hash"
+    fi
+
     # ========================================================================
     # TIER 2: ORIGINAL PAPER AUTHORS
     # ========================================================================
@@ -509,19 +532,26 @@ main() {
 
     # ControlNet models from lllyasviel (ControlNet paper author)
     log_info "ControlNet models from lllyasviel (paper author)..."
-    hf_download "lllyasviel/sd_control_collection" "diffusers_xl_canny_full.safetensors" "$MODELS_DIR/controlnet"
-    hf_download "lllyasviel/sd_control_collection" "diffusers_xl_depth_full.safetensors" "$MODELS_DIR/controlnet"
-    hf_download "lllyasviel/sd_control_collection" "thibaud_xl_openpose.safetensors" "$MODELS_DIR/controlnet"
+    hf_download "lllyasviel/sd_control_collection" "diffusers_xl_canny_full.safetensors" "$MODELS_DIR/controlnet" \
+        "80664d80e3f233371cb6921110d0a6b7a40c01571905463f9dde5637e7894ed3"
+    hf_download "lllyasviel/sd_control_collection" "diffusers_xl_depth_full.safetensors" "$MODELS_DIR/controlnet" \
+        "8ba4dfaa1958f1f68e5dc7f9839f9ef4e153aef0d330291e5cf966c925f97477"
+    hf_download "lllyasviel/sd_control_collection" "thibaud_xl_openpose.safetensors" "$MODELS_DIR/controlnet" \
+        "9e070426568a3c60c128ffb98c66cdc7a0ea21d0d8abb86f73564aaf2e0c6f42"
 
     # Depth Anything from LiheYoung (paper author)
     log_warn "Depth Anything models (.pth format - from original paper author)..."
-    hf_download "depth-anything/Depth-Anything-V2-Large" "depth_anything_v2_vitl.pth" "$MODELS_DIR/depth"
+    hf_download "depth-anything/Depth-Anything-V2-Large" "depth_anything_v2_vitl.pth" "$MODELS_DIR/depth" \
+        "a7ea19fa0ed99244e67b624c72b8580b7e9553043245905be58796a608eb9345"
 
     # Depth Anything V1 (different download path)
-    if [ ! -f "$MODELS_DIR/depth/depth_anything_vitl14.pth" ]; then
+    local depth_v1_file="$MODELS_DIR/depth/depth_anything_vitl14.pth"
+    local depth_v1_hash="6c6a383e33e51c5fdfbf31e7ebcda943973a9e6a1cbef1564afe58d7f2e8fe63"
+    if [ ! -f "$depth_v1_file" ]; then
         log_info "Downloading: depth_anything_vitl14.pth"
-        wget -q --show-progress -O "$MODELS_DIR/depth/depth_anything_vitl14.pth" \
+        wget -q --show-progress -O "$depth_v1_file" \
             "https://huggingface.co/spaces/LiheYoung/Depth-Anything/resolve/main/checkpoints/depth_anything_vitl14.pth"
+        verify_hash "$depth_v1_file" "$depth_v1_hash"
     else
         log_info "Exists: depth_anything_vitl14.pth"
     fi
@@ -534,16 +564,20 @@ main() {
 
     # GGUF models from city96 (trusted quantizer)
     log_warn "GGUF models from city96 (trusted community quantizer)..."
-    hf_download "city96/FLUX.1-dev-gguf" "flux1-dev-Q8_0.gguf" "$MODELS_DIR/unet"
-    hf_download "city96/t5-v1_1-xxl-encoder-gguf" "t5-v1_1-xxl-encoder-Q8_0.gguf" "$MODELS_DIR/clip"
+    hf_download "city96/FLUX.1-dev-gguf" "flux1-dev-Q8_0.gguf" "$MODELS_DIR/unet" \
+        "129032f32224bf7138f16e18673d8008ba5f84c1ec74063bf4511a8bb4cf553d"
+    hf_download "city96/t5-v1_1-xxl-encoder-gguf" "t5-v1_1-xxl-encoder-Q8_0.gguf" "$MODELS_DIR/clip" \
+        "1dc600961d3c5ed081f6700485cdc7ed9cfb4631f2dc385b7ac6bd3c80846d0d"
 
     # IP-Adapter from h94 (Tencent research-based)
     log_info "IP-Adapter from h94..."
-    hf_download "h94/IP-Adapter" "sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors" "$MODELS_DIR/ipadapter"
+    hf_download "h94/IP-Adapter" "sdxl_models/ip-adapter-plus_sdxl_vit-h.safetensors" "$MODELS_DIR/ipadapter" \
+        "3f5062b8400c94b7159665b21ba5c62acdcd7682262743d7f2aefedef00e6581"
 
     # CLIP Vision from fofr (ComfyUI contributor)
     log_info "CLIP Vision encoder from fofr..."
     local clip_vision_dest="$MODELS_DIR/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+    local clip_vision_hash="6ca9667da1ca9e0b0f75e46bb030f7e011f44f86cbfb8d5a36590fcd7507b030"
     if [ ! -f "$clip_vision_dest" ]; then
         hf_download "fofr/comfyui" "clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors" "$MODELS_DIR"
         # Handle nested directory structure from HuggingFace download
@@ -552,21 +586,25 @@ main() {
             rm -rf "$MODELS_DIR/clip_vision/clip_vision" "$MODELS_DIR/clip_vision/.cache" 2>/dev/null
             log_info "Moved to correct location"
         fi
+        verify_hash "$clip_vision_dest" "$clip_vision_hash"
     else
         log_info "Exists: CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
     fi
 
     # RealVisXL checkpoints from SG161222
     log_info "RealVisXL checkpoints from SG161222..."
-    hf_download "SG161222/RealVisXL_V4.0" "RealVisXL_V4.0.safetensors" "$MODELS_DIR/checkpoints"
+    hf_download "SG161222/RealVisXL_V4.0" "RealVisXL_V4.0.safetensors" "$MODELS_DIR/checkpoints" \
+        "912c9dc74f5855175c31a7993f863a043ac8dcc31732b324cd05d75cd7e16844"
 
     # RealVisXL V5.0 Lightning (requires rename for workflow compatibility)
     local realvis_dest="$MODELS_DIR/checkpoints/realvisxlV50_v50LightningBakedvae.safetensors"
+    local realvis_hash="fabcadd9330dcc4f9702063428d40b9d4d07168d8acefc819b8d1d9db466b3ec"
     if [ ! -f "$realvis_dest" ]; then
         hf_download "SG161222/RealVisXL_V5.0_Lightning" "RealVisXL_V5.0_Lightning_fp16.safetensors" "$MODELS_DIR/checkpoints"
         if [ -f "$MODELS_DIR/checkpoints/RealVisXL_V5.0_Lightning_fp16.safetensors" ]; then
             mv "$MODELS_DIR/checkpoints/RealVisXL_V5.0_Lightning_fp16.safetensors" "$realvis_dest"
             log_info "Renamed to: realvisxlV50_v50LightningBakedvae.safetensors (workflow compatibility)"
+            verify_hash "$realvis_dest" "$realvis_hash"
         fi
     else
         log_info "Exists: realvisxlV50_v50LightningBakedvae.safetensors"
@@ -574,7 +612,8 @@ main() {
 
     # UltraSharp upscaler from uwg/Kim2091
     log_warn "4x-UltraSharp upscaler (.pth format - from verified ESRGAN developer)..."
-    hf_download "uwg/upscaler" "ESRGAN/4x-UltraSharp.pth" "$MODELS_DIR/upscale_models"
+    hf_download "uwg/upscaler" "ESRGAN/4x-UltraSharp.pth" "$MODELS_DIR/upscale_models" \
+        "985fba37421353716ef2fbd7fbbab061e76409994d168cf52527aa8ee53f81ec"
 
     # ========================================================================
     # CUSTOM NODE MODELS (ComfyUI/models/)
@@ -588,7 +627,8 @@ main() {
 
     # SAM2 from Kijai (ComfyUI node developer)
     log_info "SAM2 from Kijai (for DownloadAndLoadSAM2Model node)..."
-    hf_download "Kijai/sam2-safetensors" "sam2.1_hiera_base_plus.safetensors" "$COMFYUI_MODELS/sam2"
+    hf_download "Kijai/sam2-safetensors" "sam2.1_hiera_base_plus.safetensors" "$COMFYUI_MODELS/sam2" \
+        "eb4b5f725c8b68205aa05bbe6b27efc628b18b4b9c7b9bb8218991b86b9a4932"
 
     # ========================================================================
     # POST-DOWNLOAD VERIFICATION

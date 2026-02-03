@@ -262,7 +262,9 @@ Starts the ComfyUI server with Apple Silicon optimizations.
 
 ### `setup.sh`
 
-Initial setup - creates conda environment and installs ComfyUI with all dependencies.
+Installs all required custom nodes for the workflow. Clones node packages into `ComfyUI/custom_nodes/` and installs their Python dependencies via pip.
+
+**Note:** This script does NOT create the conda environment or clone ComfyUI. Those steps must be done first (see Quick Start steps 2-4).
 
 ```bash
 ./setup.sh
