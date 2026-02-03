@@ -1,29 +1,64 @@
 # Luma - Architectural Visualization with AI
 
-A ComfyUI-based workflow for generating high-quality architectural visualizations using Stable Diffusion XL and Flux models, optimized for Apple Silicon Macs with unified memory.
+A ComfyUI-based workflow for generating high-quality architectural visualizations using Stable Diffusion XL and Flux models.
 
 Based on [PH's Archviz x AI ComfyUI Workflow v0.37](https://civitai.com/models/920108/phs-archviz-x-ai-comfyui-workflow-sdxl-flux).
 
 ---
 
+## ⚠️ Development Status
+
+**macOS/Apple Silicon development is paused indefinitely.**
+
+### Why
+
+The PH's Archviz workflow requires ~25-30 GB of models loaded simultaneously (SDXL + Flux + ControlNets + T5 encoder + CLIP Vision + SAM2 + Florence2). This workflow was designed for RTX 4090 with 24GB dedicated VRAM + system RAM.
+
+On Apple Silicon's unified memory architecture:
+- **CPU RAM = GPU VRAM** (shared memory pool)
+- ComfyUI memory flags (`--highvram`, `--lowvram`, `--disable-smart-memory`) have no effect on MPS
+- MPS forces `SHARED` vram state regardless of configuration
+- "Offload to RAM" is meaningless when VRAM = RAM
+- 64GB unified memory is insufficient for simultaneous model loading
+
+The only verified solution (adding `Unload Model` nodes to call `torch.mps.empty_cache()`) requires modifying the workflow graph itself, which is out of scope.
+
+### Recommendation
+
+**Use RunPod with NVIDIA GPU for production development:**
+- Dedicated VRAM separate from system RAM
+- Memory flags work as documented
+- Can use full Q8 models for maximum quality
+- RTX 4090 or A100 recommended
+
+### What This Repo Contains
+
+The macOS setup scripts are retained for reference and potential future optimization:
+- Local development setup that works for simpler workflows
+- Model download scripts (models work on any platform)
+- Documentation of MPS limitations discovered during testing
+
+---
+
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Requirements](#requirements)
-3. [Quick Start](#quick-start)
-4. [Directory Structure](#directory-structure)
-5. [Models](#models)
-6. [Scripts](#scripts)
-7. [Workflow](#workflow)
-8. [Apple Silicon Optimization](#apple-silicon-optimization)
-9. [Troubleshooting](#troubleshooting)
-10. [Security Notes](#security-notes)
+1. [Development Status](#️-development-status)
+2. [Overview](#overview)
+3. [Requirements](#requirements)
+4. [Quick Start](#quick-start)
+5. [Directory Structure](#directory-structure)
+6. [Models](#models)
+7. [Scripts](#scripts)
+8. [Workflow](#workflow)
+9. [Apple Silicon Notes](#apple-silicon-notes)
+10. [Troubleshooting](#troubleshooting)
+11. [Security Notes](#security-notes)
 
 ---
 
 ## Overview
 
-This project provides a complete setup for running the PH's Archviz workflow on macOS with Apple Silicon. The workflow combines:
+This project provides setup scripts for the PH's Archviz workflow. The workflow combines:
 
 - **SDXL** for initial image generation with ControlNet guidance
 - **Flux** for detail enhancement and refinement
@@ -32,7 +67,7 @@ This project provides a complete setup for running the PH's Archviz workflow on 
 - **Depth Anything** for depth map generation
 - **IP-Adapter** for style transfer from reference images
 
-The entire pipeline is optimized for 64GB unified memory Macs, with all models pre-downloaded for offline operation.
+All models are pre-downloaded for offline operation. See [Development Status](#️-development-status) for platform recommendations.
 
 ---
 
@@ -248,17 +283,16 @@ Downloads all 16 required models from HuggingFace.
 
 ### `run.sh`
 
-Starts the ComfyUI server with Apple Silicon optimizations.
+Starts the ComfyUI server.
 
 ```bash
 ./run.sh              # Localhost only (default - secure)
 ./run.sh --network    # Allow LAN connections (trusted networks only)
 ```
 
-**Optimizations applied:**
-- `--highvram` - Keeps models in unified memory
+**Flags applied:**
 - `--force-fp16` - Reduces memory usage
-- `--use-pytorch-cross-attention` - MPS-optimized attention
+- `--use-pytorch-cross-attention` - More compatible with MPS backend
 
 ### `setup.sh`
 
@@ -311,11 +345,13 @@ The workflow expects:
 
 ---
 
-## Apple Silicon Optimization
+## Apple Silicon Notes
 
-### Memory Management
+> **Note:** macOS development is paused. See [Development Status](#️-development-status).
 
-The workflow is optimized for 64GB unified memory:
+### Memory Architecture Limitations
+
+On Apple Silicon, CPU RAM and GPU VRAM share the same unified memory pool. This creates fundamental limitations for workflows designed for dedicated VRAM systems:
 
 | Component | Memory Usage |
 |-----------|-------------|
@@ -324,7 +360,20 @@ The workflow is optimized for 64GB unified memory:
 | ControlNets (3x) | ~7 GB |
 | T5-XXL Encoder | ~5 GB |
 | Other models | ~5 GB |
-| **Peak usage** | **~45-50 GB** |
+| **Total models** | **~35 GB** |
+
+When all models load simultaneously (as this workflow requires), the system exceeds available memory even on 64GB machines due to:
+- OS and application overhead (~8-10 GB)
+- PyTorch memory fragmentation
+- MPS memory management overhead
+
+### Flags That Have No Effect on MPS
+
+ComfyUI memory management flags are designed for CUDA and have no effect on Apple Silicon:
+
+- `--highvram`, `--lowvram`, `--novram` - MPS forces `SHARED` vram state regardless
+- `--disable-smart-memory` - Not applicable to unified memory
+- `--cache-none` - Does not address simultaneous model loading
 
 ### Environment Variable
 
@@ -336,9 +385,6 @@ This allows PyTorch to use all available unified memory. Set automatically by `r
 
 ### Flags to Avoid
 
-Do NOT use these flags on Apple Silicon:
-- `--lowvram` - Counterproductive on unified memory
-- `--novram` - Counterproductive on unified memory
 - `--bf16` - Not fully supported on MPS backend
 
 ### Known MPS Limitations
@@ -346,6 +392,7 @@ Do NOT use these flags on Apple Silicon:
 1. **bf16 not supported** - Uses fp16 fallback
 2. **Some operations fall back to CPU** - Normal behavior
 3. **Memory fragmentation** - MPS doesn't release memory as efficiently as CUDA
+4. **No memory offloading** - "Offload to RAM" meaningless when VRAM = RAM
 
 ---
 

@@ -27,11 +27,6 @@
 # ---------------------------
 # The following flags are optimized for unified memory architecture:
 #
-#   --highvram
-#     Keeps models loaded in memory. On unified memory systems, there's no
-#     benefit to offloading models (VRAM and RAM are the same pool).
-#     This reduces latency between operations.
-#
 #   --force-fp16
 #     Uses FP16 precision for activations. Reduces memory usage by ~50%
 #     compared to FP32 with minimal quality impact. Note: bf16 is not
@@ -42,8 +37,11 @@
 #     xformers. More compatible with MPS backend and avoids potential
 #     memory issues.
 #
-# FLAGS TO AVOID on Apple Silicon:
+# FLAGS THAT DO NOTHING on Apple Silicon:
+#   --highvram           - Ignored; MPS forces SHARED vram state regardless
 #   --lowvram, --novram  - Counterproductive on unified memory
+#
+# FLAGS TO AVOID on Apple Silicon:
 #   --bf16               - Not fully supported on MPS
 #
 # ENVIRONMENT VARIABLES
@@ -183,7 +181,7 @@ export PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0
 # ============================================================================
 
 echo -e "${GREEN}[INFO]${NC} Starting ComfyUI server..."
-echo -e "${GREEN}[INFO]${NC} Flags: --highvram --use-pytorch-cross-attention --force-fp16"
+echo -e "${GREEN}[INFO]${NC} Flags: --use-pytorch-cross-attention --force-fp16"
 echo ""
 echo -e "${BLUE}────────────────────────────────────────────────────────────────────────────${NC}"
 echo ""
@@ -193,7 +191,6 @@ cd "$COMFYUI_DIR"
 python main.py \
     --listen "$LISTEN_ADDR" \
     --port "$DEFAULT_PORT" \
-    --highvram \
     --use-pytorch-cross-attention \
     --force-fp16 \
     "$@"
