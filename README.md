@@ -55,31 +55,72 @@ The entire pipeline is optimized for 64GB unified memory Macs, with all models p
 
 ## Quick Start
 
+### Step 1: Clone this repository
+
 ```bash
-# 1. Clone the repository
 git clone <repository-url>
 cd luma
-
-# 2. Create and activate conda environment
-conda create -n luma python=3.11 -y
-conda activate luma
-
-# 3. Install ComfyUI and custom nodes
-cd comfyui
-pip install -r ComfyUI/requirements.txt
-./setup.sh
-
-# 4. Download all models (~44 GB)
-./download_models.sh
-
-# 5. Start ComfyUI
-./run.sh
-
-# 6. Open browser to http://localhost:8188
-# 7. Load workflow: archviz_v037.json
 ```
 
-**Note:** Always run `conda activate luma` before running any scripts.
+### Step 2: Create and activate the conda environment
+
+```bash
+conda create -n luma python=3.11 -y
+conda activate luma
+```
+
+### Step 3: Clone ComfyUI
+
+ComfyUI is not included in this repository. You must clone it manually:
+
+```bash
+cd comfyui
+git clone https://github.com/comfyanonymous/ComfyUI.git
+```
+
+### Step 4: Install ComfyUI dependencies
+
+```bash
+pip install -r ComfyUI/requirements.txt
+```
+
+### Step 5: Install custom nodes
+
+This script clones 28 required custom node packages and installs their dependencies:
+
+```bash
+./setup.sh
+```
+
+### Step 6: Download models (~44 GB)
+
+This script downloads all 16 required models from HuggingFace:
+
+```bash
+./download_models.sh
+```
+
+### Step 7: Copy the workflow to ComfyUI
+
+```bash
+cp ../archviz_ph_sdxlflux_v037_original.json ComfyUI/user/default/workflows/archviz_v037.json
+```
+
+### Step 8: Start ComfyUI
+
+```bash
+./run.sh
+```
+
+### Step 9: Load the workflow
+
+1. Open http://localhost:8188 in your browser
+2. Click **Load** in the menu
+3. Select `archviz_v037.json`
+
+---
+
+**Important:** Always run `conda activate luma` before running any scripts (`setup.sh`, `download_models.sh`, `run.sh`).
 
 ---
 
