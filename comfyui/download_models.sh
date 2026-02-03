@@ -100,7 +100,7 @@
 # Size: 4.7 GB
 # Purpose: T5-XXL text encoder for Flux text conditioning
 # Renamed: No
-# SHA256: 1dc600961d3c5ed081f6700485cdc7ed9cfb4631f2dc385b7ac6bd3c80846d0d
+# SHA256: 9ec60f6028534b7fe5af439fcb535d75a68592a9ca3fcdeb175ef89e3ee99825
 #
 # Model: clip_l.safetensors
 # Source: https://huggingface.co/comfyanonymous/flux_text_encoders
@@ -207,7 +207,7 @@
 # Purpose: 4x ESRGAN upscaling for final image enhancement
 # Renamed: No
 # Security: .pth format - from verified ESRGAN model collection
-# SHA256: 985fba37421353716ef2fbd7fbbab061e76409994d168cf52527aa8ee53f81ec
+# SHA256: a5812231fc936b42af08a5edba784195495d303d5b3248c24489ef0c4021fe01
 #
 # ============================================================================
 # CUSTOM NODE MODELS (ComfyUI/models/)
@@ -567,7 +567,7 @@ main() {
     hf_download "city96/FLUX.1-dev-gguf" "flux1-dev-Q8_0.gguf" "$MODELS_DIR/unet" \
         "129032f32224bf7138f16e18673d8008ba5f84c1ec74063bf4511a8bb4cf553d"
     hf_download "city96/t5-v1_1-xxl-encoder-gguf" "t5-v1_1-xxl-encoder-Q8_0.gguf" "$MODELS_DIR/clip" \
-        "1dc600961d3c5ed081f6700485cdc7ed9cfb4631f2dc385b7ac6bd3c80846d0d"
+        "9ec60f6028534b7fe5af439fcb535d75a68592a9ca3fcdeb175ef89e3ee99825"
 
     # IP-Adapter from h94 (Tencent research-based)
     log_info "IP-Adapter from h94..."
@@ -613,7 +613,7 @@ main() {
     # UltraSharp upscaler from uwg/Kim2091
     log_warn "4x-UltraSharp upscaler (.pth format - from verified ESRGAN developer)..."
     hf_download "uwg/upscaler" "ESRGAN/4x-UltraSharp.pth" "$MODELS_DIR/upscale_models" \
-        "985fba37421353716ef2fbd7fbbab061e76409994d168cf52527aa8ee53f81ec"
+        "a5812231fc936b42af08a5edba784195495d303d5b3248c24489ef0c4021fe01"
 
     # ========================================================================
     # CUSTOM NODE MODELS (ComfyUI/models/)
