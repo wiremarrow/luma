@@ -1,157 +1,172 @@
-# Luma ComfyUI - RunPod Deployment
+# Luma ComfyUI - RunPod Pod Deployment
 
-Deploy PH's Archviz ComfyUI workflow (298 nodes) on RunPod with GPU Pods.
+Deploy PH's Archviz ComfyUI workflow (298 nodes) on RunPod GPU Pods using the official ComfyUI template.
 
 ## Architecture
 
 | Component | Solution |
 |-----------|----------|
-| **Models** (~49 GB) | Network Volume - persists across sessions |
-| **Custom Nodes** (28) | Docker Image - baked in at build time |
-| **Development** | GPU Pods - full SSH access |
+| **Base Image** | RunPod's official ComfyUI Pod template |
+| **Custom Nodes** (26) | Install via ComfyUI-Manager (persists on volume) |
+| **Models** (~49 GB) | Network Volume at `/workspace/models/` |
+| **Everything** | Persists on network volume at `/workspace` |
 
 ## Quick Start
 
-### 1. Create Network Volume
+### Step 1: Create Network Volume
 
-1. RunPod Console → Storage → New Network Volume
-2. Settings:
-   - Name: `luma-models`
-   - Size: 60 GB
-   - Region: US-KS-2 (or your preferred region)
+1. RunPod Console → **Storage** → **Network Volumes**
+2. Click **+ New Network Volume**
+3. Configure:
+   - **Name**: `luma-comfyui`
+   - **Size**: `75 GB` (models + ComfyUI + custom nodes)
+   - **Datacenter**: `US-KS-2` or `US-CA-2`
+4. Click **Create**
 
-### 2. Download Models (One-time)
+**Cost**: $0.07/GB/month × 75 GB = **$5.25/month**
 
-1. Create a temporary Pod (any cheap GPU) with the network volume attached
-2. SSH into the Pod: `ssh root@<pod-ip>` (or use RunPod web terminal)
-3. Copy the download script to the Pod:
+### Step 2: Launch Setup Pod
 
-```bash
-# From your local machine
-scp scripts/download_models_runpod.sh root@<pod-ip>:/root/
-```
+1. **Pods** → **+ Deploy**
+2. **Select Template**: Search for **"ComfyUI"** (official RunPod template)
+3. **Select GPU**: Any cheap GPU (RTX 3090, ~$0.20/hr)
+4. **Attach Network Volume**: `luma-comfyui`
+5. **Deploy**
 
-4. Run the script on the Pod:
+Wait 5-10 minutes for first-time ComfyUI installation.
 
-```bash
-bash /root/download_models_runpod.sh
-```
+### Step 3: Download Models
 
-5. Wait ~30-60 minutes for all models to download
-6. Verify: `ls -lah /runpod-volume/models/*/`
-7. Terminate the temporary Pod (models persist on volume)
-
-### 3. Build & Push Docker Image
+Connect via **Web Terminal** and run:
 
 ```bash
-cd /path/to/luma/runpod
+# Create model directories
+mkdir -p /workspace/models/{checkpoints,clip,clip_vision,controlnet,ipadapter,unet,vae,upscale_models,depth,sam2}
+mkdir -p /workspace/LLM
 
-# Build for linux/amd64 (required for RunPod)
-docker build --platform linux/amd64 -t yourusername/luma-comfyui:v1 .
+# Install huggingface-cli
+pip install -q huggingface-hub
 
-# Push to Docker Hub
-docker login
-docker push yourusername/luma-comfyui:v1
+# Copy the download script to the pod and run it
+# (paste content from scripts/download_models_runpod.sh)
+bash /workspace/download_models.sh
 ```
 
-### 4. Create Pod Template
+Wait ~30-60 minutes for 49 GB to download.
 
-1. RunPod Console → Pods → Templates → New Template
-2. Settings:
-   - Template Name: `Luma ComfyUI`
-   - Container Image: `yourusername/luma-comfyui:v1`
-   - Container Disk: 20 GB
-   - Volume Disk: 0 (using network volume)
-   - Expose HTTP Ports: `8188`
+### Step 4: Configure Model Paths
 
-### 5. Launch Pod
+```bash
+cat > /workspace/runpod-slim/ComfyUI/extra_model_paths.yaml << 'EOF'
+luma:
+    base_path: /workspace/models/
+    is_default: true
+    checkpoints: checkpoints/
+    clip: clip/
+    clip_vision: clip_vision/
+    controlnet: controlnet/
+    ipadapter: ipadapter/
+    vae: vae/
+    diffusion_models: unet/
+    upscale_models: upscale_models/
+    loras: loras/
 
-1. Deploy new Pod from template
-2. Select GPU: RTX 4090 (24 GB) recommended
-3. Attach Network Volume: `luma-models`
-4. Access ComfyUI: `https://<pod-id>-8188.proxy.runpod.net`
+luma_extra:
+    base_path: /workspace/
+    sams: models/sam2/
+    depthanything: models/depth/
+    LLM: LLM/
+EOF
+```
+
+Create symlinks for custom nodes with hardcoded paths:
+
+```bash
+ln -sf /workspace/models/sam2 /workspace/runpod-slim/ComfyUI/models/sam2
+ln -sf /workspace/LLM /workspace/runpod-slim/ComfyUI/models/LLM
+ln -sf /workspace/models/depth /workspace/runpod-slim/ComfyUI/models/depthanything
+```
+
+### Step 5: Install Custom Nodes
+
+1. Open ComfyUI: Click **Connect** → **HTTP Service [Port 8188]**
+2. Open **ComfyUI-Manager** (Manager menu or gear icon)
+3. Install each node via **Install Custom Nodes**:
+
+**From Registry (search and install):**
+- ComfyUI-ControlNet-Aux
+- ComfyUI-Advanced-ControlNet
+- ComfyUI-GGUF
+- ComfyUI-IPAdapter-Plus
+- ComfyUI-Essentials
+- ComfyUI-KJNodes (may be pre-installed)
+- ComfyUI-DepthAnythingV2
+- ComfyUI-Florence2
+- ComfyUI-Segment-Anything-2
+- ComfyUI-UltimateSDUpscale
+- ComfyUI-Custom-Scripts
+- rgthree-comfy
+- ComfyUI-Easy-Use
+- Masquerade-Nodes-ComfyUI
+- ComfyUI-ComfyRoll-CustomNodes
+- ComfyMath
+- ComfyUI-Post-Processing-Nodes
+- comfy-mtb
+- ComfyUI-Impact-Pack
+- Efficiency-Nodes-ComfyUI
+
+**From Git (use "Install via Git URL"):**
+- `https://github.com/WASasquatch/was-node-suite-comfyui`
+- `https://github.com/theUpsider/ComfyUI-Logic`
+- `https://github.com/jamesWalker55/comfyui-various`
+- `https://github.com/sipherxyz/comfyui-art-venture`
+- `https://github.com/chrisgoringe/cg-image-filter`
+
+4. **Restart ComfyUI** after all installations
+
+### Step 6: Upload Workflow & Test
+
+1. In ComfyUI: **Load** → upload `archviz_v037_cuda.json`
+2. Verify no "missing node" errors
+3. Verify models appear in dropdowns
+4. **Queue Prompt** to test generation
+5. If working, **Terminate** setup Pod
+
+### Step 7: Launch Production Pod
+
+1. **Pods** → **+ Deploy**
+2. **Select Template**: **ComfyUI** (official)
+3. **Select GPU**: **RTX 4090** (24 GB, $0.34/hr)
+4. **Attach Network Volume**: `luma-comfyui`
+5. **Deploy**
+
+Everything is already configured - instant access!
 
 ## Directory Structure
 
-### Network Volume (`/runpod-volume/`)
-
 ```
-/runpod-volume/
-├── models/
-│   ├── checkpoints/          # RealVisXL models
-│   ├── clip/                 # T5 and CLIP encoders
-│   ├── clip_vision/          # CLIP Vision model
-│   ├── controlnet/           # Canny, Depth, OpenPose
-│   ├── ipadapter/            # IP-Adapter Plus
-│   ├── unet/                 # Flux GGUF
-│   ├── vae/                  # Flux VAE
-│   ├── upscale_models/       # 4x-UltraSharp
-│   ├── depth/                # Depth Anything V2
-│   └── sam2/                 # SAM 2.1
-├── LLM/
-│   └── Florence-2-large/     # Florence-2 model
-└── input/                    # Workflow input images (user-provided)
+/workspace/                              <- Network volume
+├── runpod-slim/
+│   └── ComfyUI/                         <- ComfyUI installation
+│       ├── custom_nodes/                <- Installed nodes (persists)
+│       ├── models/                      <- Symlinks to /workspace/models
+│       ├── input/                       <- Input images
+│       ├── output/                      <- Generated images
+│       └── extra_model_paths.yaml       <- Model path config
+├── models/                              <- Model storage
+│   ├── checkpoints/
+│   ├── clip/
+│   ├── clip_vision/
+│   ├── controlnet/
+│   ├── ipadapter/
+│   ├── unet/
+│   ├── vae/
+│   ├── upscale_models/
+│   ├── depth/
+│   └── sam2/
+└── LLM/
+    └── Florence-2-large/
 ```
-
-## Input Images
-
-The workflow requires input images in `/runpod-volume/input/`. You can either:
-
-1. **Upload via SCP** before launching the production Pod
-2. **Upload via ComfyUI UI** - load images through the browser interface
-
-### Required Images
-
-| Image | Purpose | Required? |
-|-------|---------|-----------|
-| `doom.jpg` | Reference/style image | Yes |
-| `ph_house01_1DEPTH.jpg` | Depth map input | Yes |
-| `ph_house01_SEG_MASK.jpg` | Segmentation mask | Yes |
-| `ph_logo_03_transparent.png` | Logo overlay | Optional |
-| `ph_credits_02.png` | Credits overlay | Optional |
-
-For initial testing, you can upload images through the ComfyUI browser UI after launching the Pod.
-
-### Docker Image
-
-- Base: `runpod/worker-comfyui:5.1.0-base`
-- Custom nodes: 21 from registry + 5 from git
-- Model paths configured via `extra_model_paths.yaml`
-- Workflow pre-loaded in `/comfyui/user/default/workflows/`
-
-## Custom Nodes Included
-
-### From ComfyUI Registry (21)
-
-- comfyui-manager
-- comfyui-controlnet-aux
-- comfyui-advanced-controlnet
-- comfyui-gguf
-- comfyui-ipadapter-plus
-- comfyui-essentials
-- comfyui-kjnodes
-- comfyui-depthanythingv2
-- comfyui-florence2
-- comfyui-segment-anything-2
-- comfyui-ultimatesdupscale
-- comfyui-custom-scripts
-- rgthree-comfy
-- comfyui-easy-use
-- masquerade-nodes-comfyui
-- comfyui-comfyroll-customnodes
-- comfymath
-- comfyui-post-processing-nodes
-- comfy-mtb
-- comfyui-impact-pack
-- efficiency-nodes-comfyui
-
-### From Git (5)
-
-- was-node-suite-comfyui
-- ComfyUI-Logic
-- comfyui-various
-- comfyui-art-venture
-- cg-image-filter
 
 ## Models (~49 GB)
 
@@ -178,99 +193,50 @@ For initial testing, you can upload images through the ComfyUI browser UI after 
 
 | GPU | VRAM | Price/hr | Use Case |
 |-----|------|----------|----------|
-| RTX 4090 | 24 GB | $0.34-0.59 | Development, single image |
+| RTX 4090 | 24 GB | $0.34 | Development, single image |
 | L40 | 48 GB | $0.89 | Multi-model, larger batches |
 | A100 80GB | 80 GB | $1.99 | Production, max performance |
 
 ## Cost Estimates
 
-- **Network Volume**: $4.20/month (60 GB @ $0.07/GB)
-- **RTX 4090 Pod**: ~$0.50/hr average
-- **Per image**: ~$0.02-0.05 (assuming 2-5 min generation)
+- **Network Volume**: $5.25/month (75 GB @ $0.07/GB)
+- **RTX 4090 Pod**: $0.34/hr
+- **Per image**: ~$0.01-0.03 (2-5 min generation)
+
+## Verification
+
+### After Model Download
+```bash
+ls /workspace/.models_downloaded          # Marker file exists
+ls /workspace/models/checkpoints/         # 2 checkpoint files
+ls /workspace/models/unet/                # flux1-dev-Q8_0.gguf
+ls /workspace/LLM/Florence-2-large/       # Florence-2 model
+```
+
+### After Node Installation
+- Load workflow → No red "missing node" errors
+- All nodes visible in node menu
 
 ## Troubleshooting
 
-### Missing Models
+### Models not found?
+- Verify `extra_model_paths.yaml` exists and has correct paths
+- Check symlinks: `ls -la /workspace/runpod-slim/ComfyUI/models/`
 
-```bash
-# Check if models exist
-ls -lah /runpod-volume/models/*/
+### Missing custom nodes?
+- Open ComfyUI-Manager → Install missing nodes
+- Restart ComfyUI after installation
 
-# Re-run download if needed
-rm /runpod-volume/.models_downloaded
-bash /path/to/download_models_runpod.sh
-```
+### OOM errors?
+- RTX 4090 (24 GB) should work
+- Try L40 (48 GB) if issues persist
 
-### Missing Custom Nodes
+### Pod starts slow?
+- First boot takes 5-10 min (ComfyUI installation)
+- Subsequent boots are fast (everything on volume)
 
-Check ComfyUI console for errors. The image includes all 26 required custom nodes.
+## Important Notes
 
-### OOM Errors
-
-- Use fp16 precision (default)
-- Reduce batch size
-- Consider upgrading to L40 (48 GB) or A100 (80 GB)
-
-### Network Volume Not Mounted
-
-Verify the volume is attached in RunPod Console. Check mount point:
-
-```bash
-df -h | grep runpod-volume
-```
-
-## Verification Checklists
-
-### Pre-Deployment
-
-- [ ] Docker image built and pushed to Docker Hub
-- [ ] Network volume created (60 GB)
-- [ ] Download script copied to Pod
-
-### Model Download Verification
-
-After running `download_models_runpod.sh`:
-
-```bash
-# All 16 models present
-ls -lah /runpod-volume/models/*/
-
-# Verify flat directory structure (critical!)
-ls /runpod-volume/models/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors
-ls /runpod-volume/models/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors
-ls /runpod-volume/models/upscale_models/4x-UltraSharp.pth
-
-# Florence-2 directory
-ls /runpod-volume/LLM/Florence-2-large/model.safetensors
-
-# Marker file exists
-ls /runpod-volume/.models_downloaded
-
-# NO nested subdirectories (these should NOT exist)
-ls /runpod-volume/models/ipadapter/sdxl_models/  # Should fail
-ls /runpod-volume/models/clip_vision/clip_vision/ # Should fail
-ls /runpod-volume/models/upscale_models/ESRGAN/   # Should fail
-```
-
-### Pod Testing Checklist
-
-- [ ] Pod starts without container errors
-- [ ] ComfyUI UI accessible at `https://<pod-id>-8188.proxy.runpod.net`
-- [ ] No "missing node" errors in browser console
-- [ ] Workflow loads: File → Load → archviz_v037_cuda.json
-- [ ] All models detected (check ComfyUI model dropdowns)
-- [ ] Input images selectable in LoadImage nodes
-- [ ] Queue prompt → Generation starts
-- [ ] Generation completes without OOM
-- [ ] Output image quality acceptable
-
-### Performance Baseline
-
-Record these metrics for reference:
-- Pod startup time: ~2-3 minutes expected
-- Full workflow generation time: ~2-5 minutes expected
-- Peak VRAM usage: Should stay under 20 GB on RTX 4090
-
-## Serverless (Future)
-
-When ready for API access, create a Serverless endpoint using the same image and network volume. See the plan document for Python client examples.
+- **DO NOT** use `runpod/worker-comfyui` - that's for Serverless only (no browser UI)
+- **USE** the official "ComfyUI" template in RunPod console
+- Everything persists on network volume - no setup needed after first time

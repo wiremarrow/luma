@@ -33,7 +33,7 @@ set -o pipefail
 # CONFIGURATION
 # ============================================================================
 
-VOLUME_PATH="/runpod-volume"
+VOLUME_PATH="/workspace"
 MODELS_PATH="$VOLUME_PATH/models"
 LOG_FILE="$VOLUME_PATH/download_log.txt"
 

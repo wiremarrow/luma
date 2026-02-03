@@ -1,7 +1,0 @@
-# Ignore everything except what we need
-*
-
-# Include these
-!Dockerfile
-!workflows/
-!workflows/**
