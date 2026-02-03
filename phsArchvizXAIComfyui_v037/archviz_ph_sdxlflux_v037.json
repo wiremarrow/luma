@@ -18,7 +18,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 279,
+      "order": 277,
       "mode": 0,
       "inputs": [
         {
@@ -64,7 +64,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 275,
+      "order": 273,
       "mode": 0,
       "inputs": [
         {
@@ -766,7 +766,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 281,
+      "order": 279,
       "mode": 0,
       "inputs": [
         {
@@ -803,7 +803,7 @@
           "links": null
         }
       ],
-      "title": "tile height (Math Expression \ud83d\udc0d)",
+      "title": "tile height (Math Expression 🐍)",
       "properties": {
         "cnr_id": "comfyui-custom-scripts",
         "ver": "1.2.3",
@@ -1319,7 +1319,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 292,
+      "order": 290,
       "mode": 0,
       "inputs": [
         {
@@ -1393,7 +1393,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 294,
+      "order": 292,
       "mode": 0,
       "inputs": [
         {
@@ -1458,7 +1458,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 295,
+      "order": 293,
       "mode": 0,
       "inputs": [
         {
@@ -1523,7 +1523,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 288,
+      "order": 286,
       "mode": 0,
       "inputs": [
         {
@@ -1588,7 +1588,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 293,
+      "order": 291,
       "mode": 0,
       "inputs": [
         {
@@ -1653,7 +1653,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 291,
+      "order": 289,
       "mode": 0,
       "inputs": [
         {
@@ -1725,7 +1725,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 289,
+      "order": 287,
       "mode": 0,
       "inputs": [
         {
@@ -3388,7 +3388,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 280,
+      "order": 278,
       "mode": 0,
       "inputs": [
         {
@@ -3594,7 +3594,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 282,
+      "order": 280,
       "mode": 0,
       "inputs": [
         {
@@ -3631,7 +3631,7 @@
           "links": null
         }
       ],
-      "title": "tile height (Math Expression \ud83d\udc0d)",
+      "title": "tile height (Math Expression 🐍)",
       "properties": {
         "cnr_id": "comfyui-custom-scripts",
         "ver": "1.2.3",
@@ -5810,7 +5810,7 @@
         830
       ],
       "flags": {},
-      "order": 283,
+      "order": 281,
       "mode": 0,
       "inputs": [
         {
@@ -6462,7 +6462,7 @@
     },
     {
       "id": 607,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         3250,
         1810
@@ -6490,7 +6490,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -6499,7 +6499,7 @@
     },
     {
       "id": 602,
-      "type": "Compare-\ud83d\udd2c",
+      "type": "Compare-🔬",
       "pos": [
         3230,
         1780
@@ -6538,7 +6538,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Compare-\ud83d\udd2c",
+        "Node name for S&R": "Compare-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -6547,7 +6547,7 @@
     },
     {
       "id": 609,
-      "type": "Int-\ud83d\udd2c",
+      "type": "Int-🔬",
       "pos": [
         3270,
         1730
@@ -6575,7 +6575,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Int-\ud83d\udd2c",
+        "Node name for S&R": "Int-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -6894,7 +6894,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        "flux1-dev-Q5_K_S.gguf"
+        "flux1-dev-Q8_0.gguf"
       ]
     },
     {
@@ -6933,7 +6933,7 @@
       "widgets_values": [
         "sam2.1_hiera_base_plus.safetensors",
         "single_image",
-        "mps",
+        "cuda",
         "bf16"
       ]
     },
@@ -7038,7 +7038,7 @@
         46
       ],
       "flags": {},
-      "order": 284,
+      "order": 282,
       "mode": 0,
       "inputs": [
         {
@@ -7091,7 +7091,7 @@
         290
       ],
       "flags": {},
-      "order": 296,
+      "order": 294,
       "mode": 0,
       "inputs": [
         {
@@ -7163,7 +7163,7 @@
     },
     {
       "id": 721,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -379,
         247
@@ -7189,7 +7189,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -7440,7 +7440,7 @@
     },
     {
       "id": 608,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -1139,
         228
@@ -7468,7 +7468,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -7512,7 +7512,7 @@
       "widgets_values": [
         "sam2.1_hiera_base_plus.safetensors",
         "automaskgenerator",
-        "mps",
+        "cuda",
         "bf16"
       ]
     },
@@ -7675,8 +7675,8 @@
             405,
             926,
             930,
-            1241,
-            1048
+            1048,
+            1241
           ]
         }
       ],
@@ -7822,7 +7822,7 @@
     },
     {
       "id": 723,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -390,
         -384
@@ -7848,7 +7848,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -7859,7 +7859,7 @@
     },
     {
       "id": 722,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -388,
         -249
@@ -7885,7 +7885,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -7981,7 +7981,7 @@
         1115.8411865234375
       ],
       "flags": {},
-      "order": 298,
+      "order": 296,
       "mode": 0,
       "inputs": [
         {
@@ -8418,7 +8418,7 @@
         411.408203125
       ],
       "flags": {},
-      "order": 287,
+      "order": 285,
       "mode": 0,
       "inputs": [
         {
@@ -8468,7 +8468,7 @@
         414
       ],
       "flags": {},
-      "order": 278,
+      "order": 276,
       "mode": 0,
       "inputs": [
         {
@@ -8528,7 +8528,7 @@
         414
       ],
       "flags": {},
-      "order": 299,
+      "order": 297,
       "mode": 0,
       "inputs": [
         {
@@ -8629,7 +8629,7 @@
         639.3659057617188
       ],
       "flags": {},
-      "order": 285,
+      "order": 283,
       "mode": 0,
       "inputs": [
         {
@@ -8703,7 +8703,7 @@
         "widget_ue_connectable": {}
       },
       "widgets_values": [
-        1.5
+        4
       ],
       "color": "#f5901d",
       "bgcolor": "#e17c09"
@@ -8833,7 +8833,7 @@
       "flags": {
         "collapsed": false
       },
-      "order": 297,
+      "order": 295,
       "mode": 0,
       "inputs": [
         {
@@ -8916,7 +8916,7 @@
         415.3110046386719
       ],
       "flags": {},
-      "order": 286,
+      "order": 284,
       "mode": 0,
       "inputs": [
         {
@@ -9299,7 +9299,7 @@
     },
     {
       "id": 771,
-      "type": "Int-\ud83d\udd2c",
+      "type": "Int-🔬",
       "pos": [
         -17.436235427856445,
         416.0547180175781
@@ -9328,7 +9328,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Int-\ud83d\udd2c",
+        "Node name for S&R": "Int-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -9347,7 +9347,7 @@
         170
       ],
       "flags": {},
-      "order": 277,
+      "order": 275,
       "mode": 0,
       "inputs": [
         {
@@ -9393,7 +9393,7 @@
     },
     {
       "id": 720,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -377,
         477
@@ -9421,7 +9421,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -10544,7 +10544,7 @@
     },
     {
       "id": 717,
-      "type": "Float-\ud83d\udd2c",
+      "type": "Float-🔬",
       "pos": [
         -1138,
         795
@@ -10570,7 +10570,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Float-\ud83d\udd2c",
+        "Node name for S&R": "Float-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [
@@ -12094,7 +12094,7 @@
         637.1516723632812
       ],
       "flags": {},
-      "order": 276,
+      "order": 274,
       "mode": 0,
       "inputs": [
         {
@@ -12179,7 +12179,7 @@
     },
     {
       "id": 600,
-      "type": "If ANY return A else B-\ud83d\udd2c",
+      "type": "If ANY return A else B-🔬",
       "pos": [
         3160,
         1880
@@ -12223,7 +12223,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "If ANY return A else B-\ud83d\udd2c",
+        "Node name for S&R": "If ANY return A else B-🔬",
         "widget_ue_connectable": {}
       },
       "widgets_values": [],
@@ -13068,7 +13068,7 @@
     },
     {
       "id": 603,
-      "type": "Int-\ud83d\udd2c",
+      "type": "Int-🔬",
       "pos": [
         3270,
         1680
@@ -13105,7 +13105,7 @@
       "properties": {
         "cnr_id": "comfyui-logic",
         "ver": "42d4f3df45fb7f0dd6e2201a14c07d4dd09f235d",
-        "Node name for S&R": "Int-\ud83d\udd2c",
+        "Node name for S&R": "Int-🔬",
         "widget_ue_connectable": {
           "value": true
         }
@@ -13128,7 +13128,7 @@
       "flags": {
         "collapsed": true
       },
-      "order": 290,
+      "order": 288,
       "mode": 0,
       "inputs": [
         {
