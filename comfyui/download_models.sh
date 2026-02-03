@@ -612,8 +612,20 @@ main() {
 
     # UltraSharp upscaler from uwg/Kim2091
     log_warn "4x-UltraSharp upscaler (.pth format - from verified ESRGAN developer)..."
-    hf_download "uwg/upscaler" "ESRGAN/4x-UltraSharp.pth" "$MODELS_DIR/upscale_models" \
-        "a5812231fc936b42af08a5edba784195495d303d5b3248c24489ef0c4021fe01"
+    local upscale_dest="$MODELS_DIR/upscale_models/4x-UltraSharp.pth"
+    local upscale_hash="a5812231fc936b42af08a5edba784195495d303d5b3248c24489ef0c4021fe01"
+    if [ ! -f "$upscale_dest" ]; then
+        hf_download "uwg/upscaler" "ESRGAN/4x-UltraSharp.pth" "$MODELS_DIR/upscale_models"
+        # Handle nested directory structure from HuggingFace download
+        if [ -f "$MODELS_DIR/upscale_models/ESRGAN/4x-UltraSharp.pth" ]; then
+            mv "$MODELS_DIR/upscale_models/ESRGAN/4x-UltraSharp.pth" "$upscale_dest"
+            rm -rf "$MODELS_DIR/upscale_models/ESRGAN" "$MODELS_DIR/upscale_models/.cache" 2>/dev/null
+            log_info "Flattened ESRGAN/ subdirectory"
+        fi
+        verify_hash "$upscale_dest" "$upscale_hash"
+    else
+        log_info "Exists: 4x-UltraSharp.pth"
+    fi
 
     # ========================================================================
     # CUSTOM NODE MODELS (ComfyUI/models/)
