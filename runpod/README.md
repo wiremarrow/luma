@@ -40,19 +40,19 @@ Wait 5-10 minutes for first-time ComfyUI installation.
 Connect via **Web Terminal** and run:
 
 ```bash
-# Create model directories
-mkdir -p /workspace/models/{checkpoints,clip,clip_vision,controlnet,ipadapter,unet,vae,upscale_models,depth,sam2}
-mkdir -p /workspace/LLM
-
-# Install huggingface-cli
-pip install -q huggingface-hub
-
-# Copy the download script to the pod and run it
-# (paste content from scripts/download_models_runpod.sh)
-bash /workspace/download_models.sh
+# Download and run the model download script
+wget -O /workspace/download_models.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/download_models.py
+python3 /workspace/download_models.py
 ```
 
-Wait ~30-60 minutes for 49 GB to download.
+The script will:
+- Auto-install `huggingface-hub` if needed
+- Create all model directories
+- Download all 16 models (~49 GB)
+- Verify SHA256 hashes
+- Handle directory flattening
+
+Wait ~30-60 minutes for downloads to complete.
 
 ### Step 4: Configure Model Paths
 
