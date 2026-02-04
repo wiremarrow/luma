@@ -709,6 +709,18 @@ def install_custom_nodes():
         capture_output=True
     )
 
+    # Pin transformers version for Florence-2 compatibility
+    # Without this, Florence-2 produces degenerate output (<s><s><s>...) instead of bounding boxes
+    # See: https://github.com/kijai/ComfyUI-Florence2/issues/135
+    log_info("Pinning transformers==4.49.0 for Florence-2 compatibility...")
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "transformers==4.49.0"],
+        capture_output=True,
+        text=True
+    )
+    if result.returncode != 0:
+        log_error(f"Failed to pin transformers: {result.stderr[:200]}")
+
     if deps_failed:
         log_error(f"Failed to install deps for: {', '.join(deps_failed)}")
         log_warn("Some nodes may not work. Check errors above.")
