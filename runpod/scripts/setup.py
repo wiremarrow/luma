@@ -682,6 +682,8 @@ def install_custom_nodes():
     log_section("Installing Node Dependencies")
 
     deps_installed = 0
+    deps_failed = []
+
     for node_dir in custom_nodes_dir.iterdir():
         if not node_dir.is_dir():
             continue
@@ -689,11 +691,17 @@ def install_custom_nodes():
         req_file = node_dir / "requirements.txt"
         if req_file.exists():
             log_info(f"Installing deps: {node_dir.name}")
-            subprocess.run(
-                [sys.executable, "-m", "pip", "install", "-q", "-r", str(req_file)],
-                capture_output=True
+            result = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "-r", str(req_file)],
+                capture_output=True,
+                text=True
             )
-            deps_installed += 1
+            if result.returncode != 0:
+                log_error(f"FAILED: {node_dir.name}")
+                log_error(f"  {result.stderr.strip()[:200]}")
+                deps_failed.append(node_dir.name)
+            else:
+                deps_installed += 1
 
     # Install soundfile for comfyui-various (no requirements.txt but needs it)
     subprocess.run(
@@ -701,7 +709,11 @@ def install_custom_nodes():
         capture_output=True
     )
 
-    log_info(f"Installed dependencies for {deps_installed} nodes")
+    if deps_failed:
+        log_error(f"Failed to install deps for: {', '.join(deps_failed)}")
+        log_warn("Some nodes may not work. Check errors above.")
+
+    log_info(f"Installed dependencies for {deps_installed} nodes ({len(deps_failed)} failed)")
 
     # Security check: warn about dangerous ultralytics versions
     try:
@@ -842,10 +854,16 @@ def main():
     log_section("Setup Complete")
 
     print()
-    log_info("Everything is installed! Next steps:")
+    log_warn("IMPORTANT: You must RESTART ComfyUI for nodes to load!")
+    print()
+    print("  Option A: Stop and Start the pod from RunPod console")
+    print("  Option B: Run this command:")
+    print("    pkill -f 'python.*main.py' && cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188 &")
+    print()
+    log_info("After restart:")
     print("  1. Open ComfyUI (Connect -> HTTP Service [Port 8188])")
     print("  2. Load workflow: archviz_v037_cuda.json")
-    print("  3. Test generation")
+    print("  3. If nodes still missing, check ComfyUI console for import errors")
     print()
     log_info(f"Download log: {LOG_FILE}")
 
