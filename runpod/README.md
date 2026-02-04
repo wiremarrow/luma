@@ -35,58 +35,22 @@ Connect via **Web Terminal** and run:
 # Accept license at: https://huggingface.co/black-forest-labs/FLUX.1-schnell
 python3 -c "from huggingface_hub import login; login()"
 
-# Run setup (downloads models, configures paths, downloads workflow)
+# Run setup (downloads everything: models, nodes, workflow)
 wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
 python3 /workspace/setup.py
 ```
 
-This takes 30-60 minutes (49 GB of models).
+This takes 30-60 minutes (49 GB of models + 26 custom nodes).
 
-### 4. Install Custom Nodes
+### 4. Test
 
-Open ComfyUI: **Connect** → **HTTP Service [Port 8188]**
+1. Open ComfyUI: **Connect** → **HTTP Service [Port 8188]**
+2. Load workflow: `archviz_v037_cuda.json` (should be in workflows tab)
+3. Verify no red "missing node" errors
+4. Verify models appear in dropdowns
+5. **Queue Prompt** to test
 
-Open **ComfyUI-Manager** and install these nodes:
-
-**From Registry (search and install):**
-- ComfyUI-ControlNet-Aux
-- ComfyUI-Advanced-ControlNet
-- ComfyUI-GGUF
-- ComfyUI-IPAdapter-Plus
-- ComfyUI-Essentials
-- ComfyUI-KJNodes
-- ComfyUI-DepthAnythingV2
-- ComfyUI-Florence2
-- ComfyUI-Segment-Anything-2
-- ComfyUI-UltimateSDUpscale
-- ComfyUI-Custom-Scripts
-- rgthree-comfy
-- ComfyUI-Easy-Use
-- Masquerade-Nodes-ComfyUI
-- ComfyUI-ComfyRoll-CustomNodes
-- ComfyMath
-- ComfyUI-Post-Processing-Nodes
-- comfy-mtb
-- ComfyUI-Impact-Pack
-- Efficiency-Nodes-ComfyUI
-
-**From Git URL:**
-- `https://github.com/WASasquatch/was-node-suite-comfyui`
-- `https://github.com/theUpsider/ComfyUI-Logic`
-- `https://github.com/jamesWalker55/comfyui-various`
-- `https://github.com/sipherxyz/comfyui-art-venture`
-- `https://github.com/chrisgoringe/cg-image-filter`
-
-**Restart ComfyUI** after all installations.
-
-### 5. Test
-
-1. In ComfyUI: **Load** → select `archviz_v037_cuda.json`
-2. Verify no red "missing node" errors
-3. Verify models appear in dropdowns
-4. **Queue Prompt** to test
-
-### 6. Future Deployments
+### 5. Future Deployments
 
 Everything persists on the network volume. For new pods:
 1. Create pod with same network volume attached
@@ -103,7 +67,8 @@ The `setup.py` script automates:
 2. **Downloads 16 models** (~49 GB) with SHA256 verification
 3. **Creates `extra_model_paths.yaml`** for ComfyUI to find models
 4. **Creates symlinks** for nodes with hardcoded paths (SAM2, Florence-2, DepthAnything)
-5. **Downloads workflow** to `/workspace/archviz_v037_cuda.json`
+5. **Installs 26 custom nodes** via git clone + requirements.txt
+6. **Downloads workflow** to ComfyUI workflows directory
 
 ## Directory Structure
 

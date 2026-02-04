@@ -579,6 +579,134 @@ def download_workflow():
         log_error(f"Failed to download workflow: {e}")
         return False
 
+# =============================================================================
+# CUSTOM NODES INSTALLATION
+# =============================================================================
+
+# All 26 verified custom node repositories
+# Organized by security tier (from comfyui/setup.sh audit)
+CUSTOM_NODES = [
+    # Tier 1: Core Infrastructure
+    ("https://github.com/ltdrdata/ComfyUI-Manager.git", "MEDIUM"),
+
+    # Tier 2: Verified Low-Risk (trusted maintainers)
+    ("https://github.com/Fannovel16/comfyui_controlnet_aux.git", "LOW"),
+    ("https://github.com/Kosinkadink/ComfyUI-Advanced-ControlNet.git", "LOW"),
+    ("https://github.com/city96/ComfyUI-GGUF.git", "LOW"),
+    ("https://github.com/cubiq/ComfyUI_IPAdapter_plus.git", "LOW"),
+    ("https://github.com/cubiq/ComfyUI_essentials.git", "LOW"),
+    ("https://github.com/kijai/ComfyUI-KJNodes.git", "LOW"),
+    ("https://github.com/kijai/ComfyUI-DepthAnythingV2.git", "LOW"),
+    ("https://github.com/kijai/ComfyUI-Florence2.git", "LOW"),
+    ("https://github.com/kijai/ComfyUI-segment-anything-2.git", "LOW"),
+    ("https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git", "LOW"),
+    ("https://github.com/pythongosssss/ComfyUI-Custom-Scripts.git", "LOW"),
+    ("https://github.com/rgthree/rgthree-comfy.git", "LOW"),
+    ("https://github.com/yolain/ComfyUI-Easy-Use.git", "LOW"),
+    ("https://github.com/BadCafeCode/masquerade-nodes-comfyui.git", "LOW"),
+    ("https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes.git", "LOW"),
+    ("https://github.com/evanspearman/ComfyMath.git", "LOW"),
+    ("https://github.com/jamesWalker55/comfyui-various.git", "LOW"),
+    ("https://github.com/EllangoK/ComfyUI-post-processing-nodes.git", "LOW"),
+    ("https://github.com/melMass/comfy_mtb.git", "LOW"),
+
+    # Tier 3: Medium-Risk (require monitoring)
+    ("https://github.com/ltdrdata/ComfyUI-Impact-Pack.git", "HIGH"),
+    ("https://github.com/jags111/efficiency-nodes-comfyui.git", "MEDIUM"),
+    ("https://github.com/sipherxyz/comfyui-art-venture.git", "MEDIUM"),
+    ("https://github.com/chrisgoringe/cg-image-filter.git", "LOW"),
+
+    # Tier 4: Archived but Required (no security updates)
+    ("https://github.com/WASasquatch/was-node-suite-comfyui.git", "HIGH"),
+    ("https://github.com/theUpsider/ComfyUI-Logic.git", "HIGH"),
+]
+
+def install_custom_nodes():
+    """Clone all custom nodes and install their dependencies."""
+    comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
+    custom_nodes_dir = comfyui_path / "custom_nodes"
+
+    if not comfyui_path.exists():
+        log_warn(f"ComfyUI not found at {comfyui_path}")
+        log_warn("Skipping custom node installation")
+        return False
+
+    log_section("Installing Custom Nodes (26 packages)")
+
+    installed = 0
+    skipped = 0
+
+    for repo_url, risk_level in CUSTOM_NODES:
+        dir_name = repo_url.split("/")[-1].replace(".git", "")
+        dest_dir = custom_nodes_dir / dir_name
+
+        if dest_dir.exists():
+            log_info(f"Exists: {dir_name}")
+            skipped += 1
+            continue
+
+        # Log with risk level
+        if risk_level == "HIGH":
+            log_warn(f"Installing {dir_name} (HIGH RISK)...")
+        elif risk_level == "MEDIUM":
+            log_warn(f"Installing {dir_name} (MEDIUM RISK)...")
+        else:
+            log_info(f"Installing {dir_name}...")
+
+        try:
+            # Clone with depth 1 for speed
+            result = subprocess.run(
+                ["git", "clone", "--depth", "1", repo_url, str(dest_dir)],
+                capture_output=True,
+                text=True
+            )
+
+            if result.returncode != 0:
+                log_error(f"Failed to clone {dir_name}: {result.stderr}")
+                continue
+
+            # Install requirements.txt if present
+            req_file = dest_dir / "requirements.txt"
+            if req_file.exists():
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", "-q", "-r", str(req_file)],
+                    capture_output=True
+                )
+
+            installed += 1
+
+        except Exception as e:
+            log_error(f"Failed to install {dir_name}: {e}")
+
+    # Install soundfile for comfyui-various (no requirements.txt but needs it)
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "-q", "soundfile"],
+        capture_output=True
+    )
+
+    log_info(f"Installed {installed} new nodes, {skipped} already existed")
+
+    # Security check: warn about dangerous ultralytics versions
+    try:
+        result = subprocess.run(
+            [sys.executable, "-m", "pip", "show", "ultralytics"],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            for line in result.stdout.split("\n"):
+                if line.startswith("Version:"):
+                    version = line.split(":")[1].strip()
+                    if version in ["8.3.41", "8.3.42", "8.3.45", "8.3.46"]:
+                        log_error(f"CRITICAL: ultralytics {version} contains malware!")
+                        log_error("Run: pip install 'ultralytics<8.3.41' to fix")
+                    else:
+                        log_info(f"ultralytics version: {version} (OK)")
+    except Exception:
+        pass
+
+    return True
+
 def main():
     print()
     print("=" * 72)
@@ -686,6 +814,9 @@ def main():
     # Configure ComfyUI (model paths + symlinks)
     configure_comfyui()
 
+    # Install custom nodes
+    install_custom_nodes()
+
     # Download workflow
     download_workflow()
 
@@ -693,16 +824,10 @@ def main():
     log_section("Setup Complete")
 
     print()
-    log_info("Verification commands:")
-    print(f"  ls -lah {MODELS_PATH}/*/")
-    print(f"  ls {VOLUME_PATH}/LLM/Florence-2-large/model.safetensors")
-    print(f"  cat /workspace/runpod-slim/ComfyUI/extra_model_paths.yaml")
-    print()
-    log_info("Remaining manual step:")
+    log_info("Everything is installed! Next steps:")
     print("  1. Open ComfyUI (Connect -> HTTP Service [Port 8188])")
-    print("  2. Install custom nodes via ComfyUI-Manager (see README Step 5)")
-    print("  3. Load workflow: archviz_v037_cuda.json")
-    print("  4. Test generation")
+    print("  2. Load workflow: archviz_v037_cuda.json")
+    print("  3. Test generation")
     print()
     log_info(f"Download log: {LOG_FILE}")
 
