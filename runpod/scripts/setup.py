@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-Model Download Script for PH's Archviz ComfyUI Workflow
-RunPod Edition - Uses huggingface_hub API directly (no CLI dependency)
+RunPod Setup Script for PH's Archviz ComfyUI Workflow
+Uses huggingface_hub API directly (no CLI dependency)
 
-Downloads all 16 models (~49 GB) required for the workflow.
-Includes SHA256 hash verification for integrity.
+This script handles the complete setup:
+1. Downloads all 16 models (~49 GB) with SHA256 verification
+2. Creates extra_model_paths.yaml for ComfyUI
+3. Creates symlinks for custom nodes with hardcoded paths
+4. Downloads the workflow JSON
 
 Usage:
-    python3 download_models.py
+    wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
+    python3 /workspace/setup.py
 
-Or pipe directly:
-    wget -qO- https://raw.githubusercontent.com/.../download_models.py | python3
+Prerequisites:
+    - HuggingFace login for gated models (Flux VAE):
+      python3 -c "from huggingface_hub import login; login()"
+    - Accept license at: https://huggingface.co/black-forest-labs/FLUX.1-schnell
 """
 
 import hashlib
@@ -472,6 +478,108 @@ def count_files():
     log_warn(f"  .gguf (from city96):    {gguf_count} files")
     log_warn(f"  .pth (from authors):    {pth_count} files")
 
+# =============================================================================
+# COMFYUI CONFIGURATION
+# =============================================================================
+
+EXTRA_MODEL_PATHS_YAML = """luma:
+    base_path: /workspace/models/
+    is_default: true
+    checkpoints: checkpoints/
+    clip: clip/
+    clip_vision: clip_vision/
+    controlnet: controlnet/
+    ipadapter: ipadapter/
+    vae: vae/
+    diffusion_models: unet/
+    upscale_models: upscale_models/
+    loras: loras/
+
+luma_extra:
+    base_path: /workspace/
+    sams: models/sam2/
+    depthanything: models/depth/
+    LLM: LLM/
+"""
+
+def configure_comfyui():
+    """Configure ComfyUI model paths and create symlinks."""
+    comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
+
+    # Check if ComfyUI exists
+    if not comfyui_path.exists():
+        log_warn(f"ComfyUI not found at {comfyui_path}")
+        log_warn("Skipping configuration - run this again after ComfyUI is installed")
+        return False
+
+    log_section("Configuring ComfyUI")
+
+    # Create extra_model_paths.yaml
+    yaml_path = comfyui_path / "extra_model_paths.yaml"
+    log_info(f"Creating {yaml_path}")
+    with open(yaml_path, "w") as f:
+        f.write(EXTRA_MODEL_PATHS_YAML)
+    log_info("Created extra_model_paths.yaml")
+
+    # Create models directory if it doesn't exist
+    models_dir = comfyui_path / "models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create symlinks for custom nodes with hardcoded paths
+    symlinks = [
+        (MODELS_PATH / "sam2", models_dir / "sam2"),
+        (VOLUME_PATH / "LLM", models_dir / "LLM"),
+        (MODELS_PATH / "depth", models_dir / "depthanything"),
+    ]
+
+    for source, target in symlinks:
+        if target.exists() or target.is_symlink():
+            target.unlink() if target.is_symlink() else None
+        try:
+            target.symlink_to(source)
+            log_info(f"Symlink: {target.name} -> {source}")
+        except Exception as e:
+            log_error(f"Failed to create symlink {target}: {e}")
+
+    log_info("ComfyUI configuration complete")
+    return True
+
+def download_workflow():
+    """Download the workflow JSON file."""
+    workflow_url = "https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/workflows/archviz_v037_cuda.json"
+
+    # Try multiple possible locations
+    comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
+    workflows_dir = comfyui_path / "user" / "default" / "workflows"
+
+    # Also save to /workspace for easy access
+    workspace_dest = VOLUME_PATH / "archviz_v037_cuda.json"
+
+    log_section("Downloading Workflow")
+
+    try:
+        import urllib.request
+
+        # Download to workspace
+        if not workspace_dest.exists():
+            log_info(f"Downloading workflow to {workspace_dest}")
+            urllib.request.urlretrieve(workflow_url, workspace_dest)
+            log_info("Workflow downloaded to /workspace/")
+        else:
+            log_info("Workflow already exists in /workspace/")
+
+        # Copy to ComfyUI workflows if directory exists
+        if workflows_dir.exists():
+            comfyui_dest = workflows_dir / "archviz_v037_cuda.json"
+            if not comfyui_dest.exists():
+                shutil.copy(workspace_dest, comfyui_dest)
+                log_info("Workflow copied to ComfyUI workflows directory")
+
+        return True
+    except Exception as e:
+        log_error(f"Failed to download workflow: {e}")
+        return False
+
 def main():
     print()
     print("=" * 72)
@@ -568,32 +676,38 @@ def main():
     # Mark as complete
     MARKER_FILE.touch()
 
-    # Completion
-    log_section("Download Complete")
-
-    if success_count == total_count:
-        log_info(f"All {total_count} models downloaded successfully!")
-    else:
+    # Check if all models downloaded
+    if success_count != total_count:
         log_error(f"Downloaded {success_count}/{total_count} models")
+        log_error("Fix the failed downloads and run again")
         return 1
+
+    log_info(f"All {total_count} models downloaded successfully!")
+
+    # Configure ComfyUI (model paths + symlinks)
+    configure_comfyui()
+
+    # Download workflow
+    download_workflow()
+
+    # Completion
+    log_section("Setup Complete")
 
     print()
     log_info("Verification commands:")
     print(f"  ls -lah {MODELS_PATH}/*/")
-    print(f"  ls {MODELS_PATH}/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors")
-    print(f"  ls {MODELS_PATH}/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors")
-    print(f"  ls {MODELS_PATH}/upscale_models/4x-UltraSharp.pth")
     print(f"  ls {VOLUME_PATH}/LLM/Florence-2-large/model.safetensors")
+    print(f"  cat /workspace/runpod-slim/ComfyUI/extra_model_paths.yaml")
     print()
-    log_info("Next steps:")
-    print("  1. Configure extra_model_paths.yaml (see README Step 4)")
-    print("  2. Create symlinks for custom nodes (see README Step 4)")
-    print("  3. Install custom nodes via ComfyUI-Manager (see README Step 5)")
-    print("  4. Load workflow and test")
+    log_info("Remaining manual step:")
+    print("  1. Open ComfyUI (Connect -> HTTP Service [Port 8188])")
+    print("  2. Install custom nodes via ComfyUI-Manager (see README Step 5)")
+    print("  3. Load workflow: archviz_v037_cuda.json")
+    print("  4. Test generation")
     print()
     log_info(f"Download log: {LOG_FILE}")
 
-    log_to_file("=== Download completed ===")
+    log_to_file("=== Setup completed ===")
 
     return 0
 
