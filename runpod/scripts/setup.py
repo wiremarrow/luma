@@ -709,18 +709,6 @@ def install_custom_nodes():
         capture_output=True
     )
 
-    # Pin transformers version for Florence-2 compatibility
-    # Without this, Florence-2 produces degenerate output (<s><s><s>...) instead of bounding boxes
-    # See: https://github.com/kijai/ComfyUI-Florence2/issues/135
-    log_info("Pinning transformers==4.49.0 for Florence-2 compatibility...")
-    result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "transformers==4.49.0"],
-        capture_output=True,
-        text=True
-    )
-    if result.returncode != 0:
-        log_error(f"Failed to pin transformers: {result.stderr[:200]}")
-
     if deps_failed:
         log_error(f"Failed to install deps for: {', '.join(deps_failed)}")
         log_warn("Some nodes may not work. Check errors above.")
@@ -747,6 +735,42 @@ def install_custom_nodes():
         pass
 
     return True
+
+def update_custom_nodes():
+    """Pull latest versions of custom nodes.
+
+    This is important because shallow clones (--depth 1) may have older code.
+    The latest versions often have critical compatibility fixes.
+    """
+    comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
+    custom_nodes_dir = comfyui_path / "custom_nodes"
+
+    if not custom_nodes_dir.exists():
+        return
+
+    log_section("Updating Custom Nodes")
+
+    updated = 0
+    for node_dir in custom_nodes_dir.iterdir():
+        if not node_dir.is_dir():
+            continue
+        git_dir = node_dir / ".git"
+        if git_dir.exists():
+            # Convert shallow clone to full and pull
+            result = subprocess.run(
+                ["git", "-C", str(node_dir), "fetch", "--unshallow"],
+                capture_output=True
+            )
+            result = subprocess.run(
+                ["git", "-C", str(node_dir), "pull", "--ff-only"],
+                capture_output=True,
+                text=True
+            )
+            if "Already up to date" not in result.stdout:
+                log_info(f"Updated: {node_dir.name}")
+                updated += 1
+
+    log_info(f"Updated {updated} nodes")
 
 def main():
     print()
@@ -858,6 +882,9 @@ def main():
 
     # Install custom nodes
     install_custom_nodes()
+
+    # Update custom nodes to latest versions (critical for compatibility fixes)
+    update_custom_nodes()
 
     # Download workflow
     download_workflow()
