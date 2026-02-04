@@ -709,6 +709,15 @@ def install_custom_nodes():
         capture_output=True
     )
 
+    # Pin transformers for Florence-2 compatibility
+    # Version 4.51.3 is confirmed to work without degenerate output
+    # See: https://huggingface.co/microsoft/Florence-2-large/discussions
+    log_info("Pinning transformers==4.51.3 for Florence-2 compatibility")
+    subprocess.run(
+        [sys.executable, "-m", "pip", "install", "transformers==4.51.3"],
+        capture_output=True
+    )
+
     if deps_failed:
         log_error(f"Failed to install deps for: {', '.join(deps_failed)}")
         log_warn("Some nodes may not work. Check errors above.")
