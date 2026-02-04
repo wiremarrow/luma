@@ -622,7 +622,13 @@ CUSTOM_NODES = [
 ]
 
 def install_custom_nodes():
-    """Clone all custom nodes and install their dependencies."""
+    """Clone all custom nodes and install their dependencies.
+
+    IMPORTANT: Dependencies are installed EVERY time, not just on first clone.
+    This is because Python packages live in the container (ephemeral), while
+    node files live on the network volume (persistent). Each new pod needs
+    dependencies reinstalled.
+    """
     comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
     custom_nodes_dir = comfyui_path / "custom_nodes"
 
@@ -633,28 +639,27 @@ def install_custom_nodes():
 
     log_section("Installing Custom Nodes (26 packages)")
 
-    installed = 0
-    skipped = 0
+    cloned = 0
+    existed = 0
 
+    # Step 1: Clone any missing repos
     for repo_url, risk_level in CUSTOM_NODES:
         dir_name = repo_url.split("/")[-1].replace(".git", "")
         dest_dir = custom_nodes_dir / dir_name
 
         if dest_dir.exists():
-            log_info(f"Exists: {dir_name}")
-            skipped += 1
+            existed += 1
             continue
 
         # Log with risk level
         if risk_level == "HIGH":
-            log_warn(f"Installing {dir_name} (HIGH RISK)...")
+            log_warn(f"Cloning {dir_name} (HIGH RISK)...")
         elif risk_level == "MEDIUM":
-            log_warn(f"Installing {dir_name} (MEDIUM RISK)...")
+            log_warn(f"Cloning {dir_name} (MEDIUM RISK)...")
         else:
-            log_info(f"Installing {dir_name}...")
+            log_info(f"Cloning {dir_name}...")
 
         try:
-            # Clone with depth 1 for speed
             result = subprocess.run(
                 ["git", "clone", "--depth", "1", repo_url, str(dest_dir)],
                 capture_output=True,
@@ -665,18 +670,30 @@ def install_custom_nodes():
                 log_error(f"Failed to clone {dir_name}: {result.stderr}")
                 continue
 
-            # Install requirements.txt if present
-            req_file = dest_dir / "requirements.txt"
-            if req_file.exists():
-                subprocess.run(
-                    [sys.executable, "-m", "pip", "install", "-q", "-r", str(req_file)],
-                    capture_output=True
-                )
-
-            installed += 1
+            cloned += 1
 
         except Exception as e:
-            log_error(f"Failed to install {dir_name}: {e}")
+            log_error(f"Failed to clone {dir_name}: {e}")
+
+    log_info(f"Cloned {cloned} new nodes, {existed} already existed")
+
+    # Step 2: Install dependencies for ALL nodes (always, every time)
+    # This is critical because pip packages don't persist on the network volume
+    log_section("Installing Node Dependencies")
+
+    deps_installed = 0
+    for node_dir in custom_nodes_dir.iterdir():
+        if not node_dir.is_dir():
+            continue
+
+        req_file = node_dir / "requirements.txt"
+        if req_file.exists():
+            log_info(f"Installing deps: {node_dir.name}")
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "-q", "-r", str(req_file)],
+                capture_output=True
+            )
+            deps_installed += 1
 
     # Install soundfile for comfyui-various (no requirements.txt but needs it)
     subprocess.run(
@@ -684,7 +701,7 @@ def install_custom_nodes():
         capture_output=True
     )
 
-    log_info(f"Installed {installed} new nodes, {skipped} already existed")
+    log_info(f"Installed dependencies for {deps_installed} nodes")
 
     # Security check: warn about dangerous ultralytics versions
     try:
@@ -715,101 +732,102 @@ def main():
     print("=" * 72)
     print()
 
-    # Check if already downloaded
-    if MARKER_FILE.exists():
-        log_warn("Models already downloaded. Delete .models_downloaded to re-download.")
-        log_warn(f"  rm {MARKER_FILE}")
-        return 0
+    # Check if models already downloaded
+    models_already_downloaded = MARKER_FILE.exists()
 
-    # Initialize log
-    log_to_file("=== Download started ===")
+    if not models_already_downloaded:
+        # Initialize log
+        log_to_file("=== Download started ===")
 
-    # Create directories
-    log_section("Creating Directory Structure")
-    create_directories()
+        # Create directories
+        log_section("Creating Directory Structure")
+        create_directories()
 
-    # Download all models
-    success_count = 0
-    total_count = 0
+        # Download all models
+        success_count = 0
+        total_count = 0
 
-    for tier_key, tier_data in MODEL_MANIFEST.items():
-        log_section(f"Downloading {tier_data['description']}")
+        for tier_key, tier_data in MODEL_MANIFEST.items():
+            log_section(f"Downloading {tier_data['description']}")
 
-        for model in tier_data["models"]:
-            total_count += 1
-            name = model["name"]
+            for model in tier_data["models"]:
+                total_count += 1
+                name = model["name"]
 
-            # Print format warning if present
-            if model.get("format_warning"):
-                log_warn(f"{name} ({model['format_warning']})...")
-            else:
-                log_info(f"{name}...")
+                # Print format warning if present
+                if model.get("format_warning"):
+                    log_warn(f"{name} ({model['format_warning']})...")
+                else:
+                    log_info(f"{name}...")
 
-            # Determine destination directory
-            if model.get("dest_is_absolute"):
-                dest_dir = VOLUME_PATH / model["dest"]
-            else:
-                dest_dir = MODELS_PATH / model["dest"]
+                # Determine destination directory
+                if model.get("dest_is_absolute"):
+                    dest_dir = VOLUME_PATH / model["dest"]
+                else:
+                    dest_dir = MODELS_PATH / model["dest"]
 
-            # Download based on type
-            if model.get("url"):
-                # Direct URL download
-                success = download_url(
-                    url=model["url"],
-                    dest_dir=dest_dir,
-                    filename=model["file"],
-                    expected_hash=model.get("hash"),
-                )
-            elif model.get("file") is None:
-                # Full repository download
-                success = download_repo(
-                    repo_id=model["repo"],
-                    dest_dir=dest_dir,
-                    hash_file=model.get("hash_file"),
-                    expected_hash=model.get("hash"),
-                )
-            else:
-                # Single file download
-                success = download_file(
-                    repo_id=model["repo"],
-                    filename=model["file"],
-                    dest_dir=dest_dir,
-                    expected_hash=model.get("hash"),
-                    flatten_from=model.get("flatten_from"),
-                    rename_to=model.get("rename_to"),
-                )
+                # Download based on type
+                if model.get("url"):
+                    # Direct URL download
+                    success = download_url(
+                        url=model["url"],
+                        dest_dir=dest_dir,
+                        filename=model["file"],
+                        expected_hash=model.get("hash"),
+                    )
+                elif model.get("file") is None:
+                    # Full repository download
+                    success = download_repo(
+                        repo_id=model["repo"],
+                        dest_dir=dest_dir,
+                        hash_file=model.get("hash_file"),
+                        expected_hash=model.get("hash"),
+                    )
+                else:
+                    # Single file download
+                    success = download_file(
+                        repo_id=model["repo"],
+                        filename=model["file"],
+                        dest_dir=dest_dir,
+                        expected_hash=model.get("hash"),
+                        flatten_from=model.get("flatten_from"),
+                        rename_to=model.get("rename_to"),
+                    )
 
-            if success:
-                success_count += 1
+                if success:
+                    success_count += 1
 
-    # Verification
-    log_section("Post-Download Verification")
+        # Verification
+        log_section("Post-Download Verification")
 
-    # Clean up any remaining .cache directories
-    for cache_dir in MODELS_PATH.rglob(".cache"):
-        shutil.rmtree(cache_dir, ignore_errors=True)
+        # Clean up any remaining .cache directories
+        for cache_dir in MODELS_PATH.rglob(".cache"):
+            shutil.rmtree(cache_dir, ignore_errors=True)
 
-    # Verify flat structure
-    log_info("Verifying flat directory structure...")
-    errors = verify_flat_structure()
+        # Verify flat structure
+        log_info("Verifying flat directory structure...")
+        errors = verify_flat_structure()
 
-    if errors > 0:
-        log_error(f"{errors} directory structure errors found!")
-        return 1
+        if errors > 0:
+            log_error(f"{errors} directory structure errors found!")
+            return 1
 
-    # Count files
-    count_files()
+        # Count files
+        count_files()
 
-    # Mark as complete
-    MARKER_FILE.touch()
+        # Mark as complete
+        MARKER_FILE.touch()
 
-    # Check if all models downloaded
-    if success_count != total_count:
-        log_error(f"Downloaded {success_count}/{total_count} models")
-        log_error("Fix the failed downloads and run again")
-        return 1
+        # Check if all models downloaded
+        if success_count != total_count:
+            log_error(f"Downloaded {success_count}/{total_count} models")
+            log_error("Fix the failed downloads and run again")
+            return 1
 
-    log_info(f"All {total_count} models downloaded successfully!")
+        log_info(f"All {total_count} models downloaded successfully!")
+    else:
+        log_info("Models already downloaded (skipping)")
+        log_info("To re-download: rm /workspace/.models_downloaded")
 
     # Configure ComfyUI (model paths + symlinks)
     configure_comfyui()
