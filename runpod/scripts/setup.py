@@ -756,18 +756,39 @@ def update_custom_nodes():
             continue
         git_dir = node_dir / ".git"
         if git_dir.exists():
-            # Convert shallow clone to full and pull
-            result = subprocess.run(
-                ["git", "-C", str(node_dir), "fetch", "--unshallow"],
-                capture_output=True
-            )
-            result = subprocess.run(
-                ["git", "-C", str(node_dir), "pull", "--ff-only"],
+            # Check if shallow clone
+            shallow_file = git_dir / "shallow"
+            if shallow_file.exists():
+                # Convert shallow clone to full
+                subprocess.run(
+                    ["git", "-C", str(node_dir), "fetch", "--unshallow"],
+                    capture_output=True,
+                    timeout=120
+                )
+
+            # Get current commit before pull
+            before = subprocess.run(
+                ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
                 capture_output=True,
                 text=True
+            ).stdout.strip()
+
+            # Pull latest
+            subprocess.run(
+                ["git", "-C", str(node_dir), "pull", "--ff-only"],
+                capture_output=True,
+                timeout=120
             )
-            if "Already up to date" not in result.stdout:
-                log_info(f"Updated: {node_dir.name}")
+
+            # Get commit after pull
+            after = subprocess.run(
+                ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
+                capture_output=True,
+                text=True
+            ).stdout.strip()
+
+            if before != after:
+                log_info(f"Updated: {node_dir.name} ({before[:7]} -> {after[:7]})")
                 updated += 1
 
     log_info(f"Updated {updated} nodes")
