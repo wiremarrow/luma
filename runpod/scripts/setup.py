@@ -568,12 +568,11 @@ def download_workflow():
         else:
             log_info("Workflow already exists in /workspace/")
 
-        # Copy to ComfyUI workflows if directory exists
-        if workflows_dir.exists():
-            comfyui_dest = workflows_dir / "archviz_v037_cuda.json"
-            if not comfyui_dest.exists():
-                shutil.copy(workspace_dest, comfyui_dest)
-                log_info("Workflow copied to ComfyUI workflows directory")
+        # Copy to ComfyUI workflows directory (create if needed)
+        workflows_dir.mkdir(parents=True, exist_ok=True)
+        comfyui_dest = workflows_dir / "archviz_v037_cuda.json"
+        shutil.copy(workspace_dest, comfyui_dest)
+        log_info("Workflow installed to ComfyUI workflows directory")
 
         return True
     except Exception as e:
