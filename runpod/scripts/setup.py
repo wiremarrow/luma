@@ -745,11 +745,21 @@ def install_custom_nodes():
 
     return True
 
+# Pinned versions for compatibility
+# Some nodes need specific versions to work with pinned dependencies
+PINNED_NODE_VERSIONS = {
+    # ComfyUI-Florence2 v1.0.7: Uses torch_dtype (not dtype) compatible with transformers 4.51.3
+    # Latest version uses dtype= which is invalid for transformers < 5.0
+    "ComfyUI-Florence2": "6c766b1",
+}
+
 def update_custom_nodes():
-    """Pull latest versions of custom nodes.
+    """Pull latest versions of custom nodes (with version pinning for compatibility).
 
     This is important because shallow clones (--depth 1) may have older code.
     The latest versions often have critical compatibility fixes.
+
+    Some nodes are pinned to specific versions due to dependency compatibility.
     """
     comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
     custom_nodes_dir = comfyui_path / "custom_nodes"
@@ -760,47 +770,87 @@ def update_custom_nodes():
     log_section("Updating Custom Nodes")
 
     updated = 0
+    pinned = 0
+
     for node_dir in custom_nodes_dir.iterdir():
         if not node_dir.is_dir():
             continue
         git_dir = node_dir / ".git"
-        if git_dir.exists():
-            # Check if shallow clone
+        if not git_dir.exists():
+            continue
+
+        node_name = node_dir.name
+
+        # Check if this node is pinned to a specific version
+        if node_name in PINNED_NODE_VERSIONS:
+            target_commit = PINNED_NODE_VERSIONS[node_name]
+
+            # Fetch all history first (needed for checkout)
             shallow_file = git_dir / "shallow"
             if shallow_file.exists():
-                # Convert shallow clone to full
                 subprocess.run(
                     ["git", "-C", str(node_dir), "fetch", "--unshallow"],
                     capture_output=True,
                     timeout=120
                 )
 
-            # Get current commit before pull
-            before = subprocess.run(
+            # Check current commit
+            current = subprocess.run(
                 ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
                 capture_output=True,
                 text=True
             ).stdout.strip()
 
-            # Pull latest
+            if not current.startswith(target_commit):
+                # Checkout the pinned version
+                subprocess.run(
+                    ["git", "-C", str(node_dir), "checkout", target_commit],
+                    capture_output=True,
+                    timeout=60
+                )
+                log_info(f"Pinned: {node_name} -> {target_commit} (for transformers 4.51.3 compatibility)")
+                pinned += 1
+            else:
+                log_info(f"Already pinned: {node_name} @ {target_commit[:7]}")
+
+            continue
+
+        # Regular update for non-pinned nodes
+        # Check if shallow clone
+        shallow_file = git_dir / "shallow"
+        if shallow_file.exists():
             subprocess.run(
-                ["git", "-C", str(node_dir), "pull", "--ff-only"],
+                ["git", "-C", str(node_dir), "fetch", "--unshallow"],
                 capture_output=True,
                 timeout=120
             )
 
-            # Get commit after pull
-            after = subprocess.run(
-                ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
-                capture_output=True,
-                text=True
-            ).stdout.strip()
+        # Get current commit before pull
+        before = subprocess.run(
+            ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True
+        ).stdout.strip()
 
-            if before != after:
-                log_info(f"Updated: {node_dir.name} ({before[:7]} -> {after[:7]})")
-                updated += 1
+        # Pull latest
+        subprocess.run(
+            ["git", "-C", str(node_dir), "pull", "--ff-only"],
+            capture_output=True,
+            timeout=120
+        )
 
-    log_info(f"Updated {updated} nodes")
+        # Get commit after pull
+        after = subprocess.run(
+            ["git", "-C", str(node_dir), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True
+        ).stdout.strip()
+
+        if before != after:
+            log_info(f"Updated: {node_dir.name} ({before[:7]} -> {after[:7]})")
+            updated += 1
+
+    log_info(f"Updated {updated} nodes, pinned {pinned} nodes")
 
 def main():
     print()
