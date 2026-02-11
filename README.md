@@ -43,16 +43,101 @@ The macOS setup scripts are retained for reference and potential future optimiza
 ## Table of Contents
 
 1. [Development Status](#️-development-status)
-2. [Overview](#overview)
-3. [Requirements](#requirements)
-4. [Quick Start](#quick-start)
-5. [Directory Structure](#directory-structure)
-6. [Models](#models)
-7. [Scripts](#scripts)
-8. [Workflow](#workflow)
-9. [Apple Silicon Notes](#apple-silicon-notes)
-10. [Troubleshooting](#troubleshooting)
-11. [Security Notes](#security-notes)
+2. [RunPod Deployment](#runpod-deployment)
+3. [Scene Configs](#scene-configs)
+4. [Overview](#overview)
+5. [Requirements](#requirements)
+6. [Quick Start](#quick-start)
+7. [Directory Structure](#directory-structure)
+8. [Models](#models)
+9. [Scripts](#scripts)
+10. [Workflow](#workflow)
+11. [Apple Silicon Notes](#apple-silicon-notes)
+12. [Troubleshooting](#troubleshooting)
+13. [Security Notes](#security-notes)
+
+---
+
+## RunPod Deployment
+
+Deploy the workflow on a RunPod GPU Pod using the official ComfyUI template.
+
+### First-Time Setup
+
+On the pod web terminal:
+
+```bash
+wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
+python3 /workspace/setup.py
+```
+
+`setup.py` handles everything: clones ComfyUI, installs all 26 custom nodes, downloads 16 models (~49 GB) from HuggingFace, pins compatibility versions (transformers 4.51.3, ComfyUI-Florence2 v1.0.7), and installs the workflow.
+
+On first run you'll be prompted for your HuggingFace token (required for gated models like Flux). Models are saved to the network volume at `/workspace` and persist across pod restarts.
+
+### Subsequent Runs
+
+After pod restart, models are already downloaded. Run setup to reinstall custom nodes (Python packages don't persist), then restart ComfyUI:
+
+```bash
+wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
+python3 /workspace/setup.py
+pkill -f 'python.*main.py'
+cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
+```
+
+### With a Custom Scene Config
+
+To apply a scene config (custom prompts for a specific building/project):
+
+```bash
+wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
+wget -O /workspace/scene_config.json https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/configs/scene_sped_center.json
+python3 /workspace/setup.py
+pkill -f 'python.*main.py'
+cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
+```
+
+When a scene config is present at `/workspace/scene_config.json`, setup creates a patched workflow (`archviz_v037_cuda_custom.json`) with the custom prompts. The original base workflow is never modified. Open `archviz_v037_cuda_custom.json` in ComfyUI.
+
+---
+
+## Scene Configs
+
+Scene configs extract the 16 hardcoded text prompts from the workflow into an editable JSON file. This lets you switch between projects without manually editing nodes in the ComfyUI GUI.
+
+### Available Configs
+
+| Config | Description |
+|--------|-------------|
+| `scene_default.json` | Default prompts (black tinyhouse in forest) |
+| `scene_sped_center.json` | FBISD Special Education Transportation Center |
+
+### Creating a New Config
+
+Extract the current prompts from the base workflow as a starting point:
+
+```bash
+python3 runpod/scripts/patch_scene.py --extract \
+  --workflow runpod/workflows/archviz_v037_cuda.json \
+  --output runpod/configs/scene_myproject.json
+```
+
+Edit the `"prompt"` values in the output file. Partial configs are supported — only the entries you include get patched.
+
+### Config Structure
+
+Prompts are grouped by purpose:
+
+- **architecture** (6 prompts) — building description, environment, lighting
+- **human_subject** (5 prompts) — person generation and framing
+- **background** (1 prompt) — sky replacement
+- **detection** (2 prompts) — Florence-2 object/building detection labels
+- **negative** (2 prompts) — global and scene-specific negative prompts
+
+### Person Insertion
+
+The workflow requires a manually drawn mask to place a generated person into the scene. In ComfyUI, right-click the input image node, open the mask editor, and paint over the area where the person should appear.
 
 ---
 
