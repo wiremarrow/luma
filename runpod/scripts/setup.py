@@ -20,6 +20,7 @@ Prerequisites:
 """
 
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -870,6 +871,68 @@ def update_custom_nodes():
 
     log_info(f"Updated {updated} nodes, pinned {pinned} nodes")
 
+def apply_scene_config():
+    """Apply scene-specific prompts to a copy of the workflow.
+
+    Looks for /workspace/scene_config.json. If found, patches prompts
+    into a new file (archviz_v037_cuda_custom.json) and installs that.
+    The original workflow is never modified.
+    """
+    config_path = VOLUME_PATH / "scene_config.json"
+    workflow_path = VOLUME_PATH / "archviz_v037_cuda.json"
+    comfyui_path = VOLUME_PATH / "runpod-slim" / "ComfyUI"
+    workflows_dir = comfyui_path / "user" / "default" / "workflows"
+
+    if not config_path.exists():
+        log_info("No scene config found at /workspace/scene_config.json (using defaults)")
+        return
+
+    if not workflow_path.exists():
+        log_warn("Workflow not found, skipping scene config")
+        return
+
+    log_section("Applying Scene Configuration")
+
+    with open(config_path) as f:
+        config = json.load(f)
+
+    with open(workflow_path) as f:
+        workflow = json.load(f)
+
+    # Build node_id -> (widget_index, prompt) from config
+    patches = {}
+    for section_key, section in config.items():
+        if section_key.startswith("_") or not isinstance(section, dict):
+            continue
+        for entry_key, entry in section.items():
+            if entry_key.startswith("_") or not isinstance(entry, dict):
+                continue
+            if "node_id" in entry and "prompt" in entry:
+                patches[entry["node_id"]] = (entry.get("widget_index", 0), entry["prompt"])
+
+    # Apply patches
+    patched = 0
+    for node in workflow.get("nodes", []):
+        nid = node.get("id")
+        if nid in patches and "widgets_values" in node:
+            widget_index, prompt = patches[nid]
+            if widget_index < len(node["widgets_values"]):
+                node["widgets_values"][widget_index] = prompt
+                patched += 1
+
+    # Write patched copy (never overwrite the original)
+    custom_path = VOLUME_PATH / "archviz_v037_cuda_custom.json"
+    with open(custom_path, "w") as f:
+        json.dump(workflow, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    log_info(f"Applied {patched}/{len(patches)} scene prompts -> {custom_path.name}")
+
+    # Install the custom workflow to ComfyUI
+    if workflows_dir.exists():
+        shutil.copy(custom_path, workflows_dir / "archviz_v037_cuda_custom.json")
+        log_info("Custom workflow installed to ComfyUI workflows directory")
+
 def main():
     print()
     print("=" * 72)
@@ -989,6 +1052,9 @@ def main():
 
     # Download workflow
     download_workflow()
+
+    # Apply scene-specific prompts if config exists
+    apply_scene_config()
 
     # Completion
     log_section("Setup Complete")

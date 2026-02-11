@@ -1,0 +1,93 @@
+{
+  "_description": "Scene prompts for archviz workflow. Edit 'prompt' values to customize.",
+  "architecture": {
+    "sdxl_positive": {
+      "node_id": 5,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a black tinyhouse made entirely of straight vertical (black:1.5) woodplanks, the house has a glass facade on the right side with a glass parapet infront and a low horizontal window on the left side, a completely closed basement level, surrounded by a dense dark mystic forest of detailed old lush pine trees, dense wafts of fog surrounding the scene, moss, fern, mushrooms, vignette, low key photography"
+    },
+    "flux_positive": {
+      "node_id": 52,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a black tinyhouse made entirely of (black wood:1.5) planks in a dense forest of detailed old pine trees close to a beautiful lake with crystalclear water on a sunny day with warm sunlight"
+    },
+    "flux_power_prompt": {
+      "node_id": 116,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a black tinyhouse made entirely of straight vertical (black:1.5) glossy woodplanks with sharp edges a completely closed basement level in a dense old mystic forest of detailed lush pine trees, dense wafts of fog between trees, moss, fern, mushrooms"
+    },
+    "flux_object": {
+      "node_id": 403,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a entirely white tinyhouse made of straight vertical (white:1.5) glossy woodpanels on white massive socket in a dense old lush pine forest with lots of detailed foliage and trees in foreground, dense wafts of fog surrounding the scene, the house has a completely closed first floor, a big window in the second floor on the right side is shifted inwards reflecting the facade and has a glass railing infront forming a recessed balcony, a low horizontal window on the left side is the only opening"
+    },
+    "environment": {
+      "node_id": 404,
+      "widget_index": 0,
+      "prompt": "surrounded by a dense dark forest of detailed lush foliage trees and rough rock terrain covered in fog, fern and moss covering the ground, cloudy sky with colorful sunlight over mountains in background"
+    },
+    "lighting_style": {
+      "node_id": 405,
+      "widget_index": 0,
+      "prompt": "a diffuse sky is illuminating the scene creating high contrasts, vignette, low key photography, tilt shift lens,"
+    }
+  },
+  "human_subject": {
+    "person_flux": {
+      "node_id": 408,
+      "widget_index": 0,
+      "prompt": "a young woman in a yellow jacket hiking through the forest carrying a backpack, close up photo taken from behind, zoomed in from a distance"
+    },
+    "person_generation": {
+      "node_id": 396,
+      "widget_index": 0,
+      "prompt": "fullbody photo of a hunter in a deep lush forest in the mountains"
+    },
+    "person_framing": {
+      "node_id": 82,
+      "widget_index": 0,
+      "prompt": "cinematic (fullbody:1,6) photo portrait of "
+    },
+    "photography_style": {
+      "node_id": 482,
+      "widget_index": 0,
+      "prompt": "professional photoshooting, camera zoomed in to capture the body silhouette filling the image canvas"
+    },
+    "portrait_framing": {
+      "node_id": 484,
+      "widget_index": 0,
+      "prompt": "professional close up (fullbody) (portrait:1,3) photo of "
+    }
+  },
+  "background": {
+    "sky_replacement": {
+      "node_id": 386,
+      "widget_index": 0,
+      "prompt": "photo of tall futuristic buildings in a lit city, dark night, dense fog clouds\n"
+    }
+  },
+  "detection": {
+    "object_detection": {
+      "node_id": 550,
+      "widget_index": 0,
+      "prompt": "people, human, face, hand, feet, shoe, leg, bag, backpack, pet, dog, cat, gun, animal"
+    },
+    "building_detection": {
+      "node_id": 580,
+      "widget_index": 0,
+      "prompt": "house, building, facade"
+    }
+  },
+  "negative": {
+    "negative_global": {
+      "node_id": 296,
+      "widget_index": 0,
+      "prompt": "(hands), text, error, cropped, (worst quality:1.2), (low quality:1.2), normal quality, (jpeg artifacts:1.3), signature, watermark, username, blurry, anime, cartoon, cgi, painting, sketch (copyright:1.2), nsfw"
+    },
+    "negative_scene_specific": {
+      "node_id": 298,
+      "widget_index": 0,
+      "prompt": "stairs, entrance, terrace, doors, lights"
+    }
+  }
+}
