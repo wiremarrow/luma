@@ -83,7 +83,7 @@ After pod restart, models are already downloaded. Run setup to reinstall custom 
 wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/scripts/setup.py
 python3 /workspace/setup.py
 pkill -f 'python.*main.py'
-cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
+cd /workspace/runpod-slim/ComfyUI && python3 main.py --listen 0.0.0.0 --port 8188
 ```
 
 ### With a Custom Scene Config
@@ -95,7 +95,7 @@ wget -O /workspace/setup.py https://raw.githubusercontent.com/wiremarrow/luma/ma
 wget -O /workspace/scene_config.json https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/configs/scene_sped_center.json
 python3 /workspace/setup.py
 pkill -f 'python.*main.py'
-cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188
+cd /workspace/runpod-slim/ComfyUI && python3 main.py --listen 0.0.0.0 --port 8188
 ```
 
 When a scene config is present at `/workspace/scene_config.json`, setup creates a patched workflow (`archviz_v037_cuda_custom.json`) with the custom prompts. The original base workflow is never modified. Open `archviz_v037_cuda_custom.json` in ComfyUI.

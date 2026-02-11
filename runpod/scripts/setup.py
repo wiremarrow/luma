@@ -1064,7 +1064,7 @@ def main():
     print()
     print("  Option A: Stop and Start the pod from RunPod console")
     print("  Option B: Run this command:")
-    print("    pkill -f 'python.*main.py' && cd /workspace/runpod-slim/ComfyUI && python main.py --listen 0.0.0.0 --port 8188 &")
+    print("    pkill -f 'python.*main.py' && cd /workspace/runpod-slim/ComfyUI && python3 main.py --listen 0.0.0.0 --port 8188 &")
     print()
     log_info("After restart:")
     print("  1. Open ComfyUI (Connect -> HTTP Service [Port 8188])")
