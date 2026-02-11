@@ -1,0 +1,94 @@
+{
+  "_description": "SPED Transportation Center - prompts describe the building content styled after professional architecture photography (Mead Middle School reference).",
+
+  "architecture": {
+    "sdxl_positive": {
+      "node_id": 5,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a single-story (red brick:1.5) institutional building with cream masonry accent panels, a glass entrance with aluminum-framed doors and a flat metal canopy, dark-framed rectangular windows, clean geometric facade with building signage, warm golden hour sunlight casting sharp shadows highlighting material textures, manicured landscaping with ornamental trees and flowering shrubs, vignette, professional photography"
+    },
+    "flux_positive": {
+      "node_id": 52,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a modern single-story (red brick:1.5) transportation center building with cream white accent walls and glass entrance on a bright sunny day with warm directional sunlight, green landscaping, clear blue sky"
+    },
+    "flux_power_prompt": {
+      "node_id": 116,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a single-story (red brick:1.5) institutional building with clean geometric forms, cream masonry panels, flat metal entrance canopy over glass double doors, dark-framed windows, sharp material contrasts between red brick and white surfaces, warm sunlight with crisp shadows"
+    },
+    "flux_object": {
+      "node_id": 403,
+      "widget_index": 0,
+      "prompt": "masterpiece architecture photography of a modern single-story (red brick:1.5) institutional building with (cream white:1.3) masonry accent panels on a solid base, a recessed glass entrance with flat metal canopy and aluminum-framed doors, dark-framed rectangular windows evenly spaced along the facade, building signage on the brick wall, clean parking area in foreground with crisp white line markings, ornamental trees and flowering shrubs along the foundation"
+    },
+    "environment": {
+      "node_id": 404,
+      "widget_index": 0,
+      "prompt": "surrounded by a clean asphalt parking lot with crisp white markings, manicured green lawn and ornamental landscaping with flowering shrubs and small trees, clear blue sky with bright warm sunlight on a sunny day"
+    },
+    "lighting_style": {
+      "node_id": 405,
+      "widget_index": 0,
+      "prompt": "warm directional sunlight creating sharp shadows and high contrast on building surfaces, professional architecture photography lighting, tilt shift lens, vivid colors, high clarity"
+    }
+  },
+  "human_subject": {
+    "person_flux": {
+      "node_id": 408,
+      "widget_index": 0,
+      "prompt": "a professional woman in business casual attire walking toward the building entrance carrying a folder, photo taken from a distance"
+    },
+    "person_generation": {
+      "node_id": 396,
+      "widget_index": 0,
+      "prompt": "fullbody photo of a professional person walking on a clean sidewalk near a modern building"
+    },
+    "person_framing": {
+      "node_id": 82,
+      "widget_index": 0,
+      "prompt": "cinematic (fullbody:1,6) photo portrait of "
+    },
+    "photography_style": {
+      "node_id": 482,
+      "widget_index": 0,
+      "prompt": "professional photoshooting, camera zoomed in to capture the body silhouette filling the image canvas"
+    },
+    "portrait_framing": {
+      "node_id": 484,
+      "widget_index": 0,
+      "prompt": "professional close up (fullbody) (portrait:1,3) photo of "
+    }
+  },
+  "background": {
+    "sky_replacement": {
+      "node_id": 386,
+      "widget_index": 0,
+      "prompt": "photo of a clear bright blue sky with a few soft white clouds on a sunny day, warm sunlight\n"
+    }
+  },
+  "detection": {
+    "object_detection": {
+      "node_id": 550,
+      "widget_index": 0,
+      "prompt": "people, human, face, hand, feet, shoe, leg, bag, backpack, pet, dog, cat, gun, animal, bus, vehicle, car"
+    },
+    "building_detection": {
+      "node_id": 580,
+      "widget_index": 0,
+      "prompt": "house, building, facade, school, institutional building"
+    }
+  },
+  "negative": {
+    "negative_global": {
+      "node_id": 296,
+      "widget_index": 0,
+      "prompt": "(hands), text, error, cropped, (worst quality:1.2), (low quality:1.2), normal quality, (jpeg artifacts:1.3), signature, watermark, username, blurry, anime, cartoon, cgi, painting, sketch (copyright:1.2), nsfw"
+    },
+    "negative_scene_specific": {
+      "node_id": 298,
+      "widget_index": 0,
+      "prompt": "forest, trees in foreground, fog, mist, night, dark, snow, mountains, cabin, wooden house"
+    }
+  }
+}
