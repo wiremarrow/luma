@@ -544,6 +544,24 @@ def configure_comfyui():
     log_info("ComfyUI configuration complete")
     return True
 
+def create_transparent_square():
+    """Create transparent_square.png for workflow overlay nodes.
+
+    The workflow's Image Overlay nodes use this as a default overlay image.
+    Must be larger than 1x1 to avoid efficiency-nodes tensor2pil squeeze() crash.
+    """
+    comfyui_input = VOLUME_PATH / "runpod-slim" / "ComfyUI" / "input"
+    comfyui_input.mkdir(parents=True, exist_ok=True)
+
+    path = comfyui_input / "transparent_square.png"
+    if not path.exists():
+        from PIL import Image
+        img = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+        img.save(path)
+        log_info("Created transparent_square.png (1024x1024)")
+    else:
+        log_info("transparent_square.png exists")
+
 def download_workflow():
     """Download the workflow JSON file."""
     workflow_url = "https://raw.githubusercontent.com/wiremarrow/luma/main/runpod/workflows/archviz_v037_cuda.json"
@@ -959,6 +977,9 @@ def main():
 
     # Configure ComfyUI (model paths + symlinks)
     configure_comfyui()
+
+    # Create transparent placeholder images for overlay nodes
+    create_transparent_square()
 
     # Install custom nodes
     install_custom_nodes()
